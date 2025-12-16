@@ -1,0 +1,1327 @@
+//
+// _non-responsive.scss
+// This file disables all responsive behaviors to maintain desktop layout on all screen sizes
+//
+
+@use "variables" as *;
+
+/*********************************/
+/*  FORCE DESKTOP VIEWPORT       */
+/*===============================*/
+// Set minimum width to force desktop layout
+html {
+    min-width: 1200px !important;
+}
+
+body {
+    min-width: 1200px !important;
+}
+
+/*********************************/
+/*  BOOTSTRAP GRID OVERRIDES     */
+/*===============================*/
+// Force container to always use desktop max-width
+.container {
+    max-width: 1140px !important;
+    width: 100% !important;
+}
+
+// Override all responsive column classes to use their largest breakpoint values
+// Small breakpoint columns - treat as lg
+.col-sm-1 {
+    flex: 0 0 auto !important;
+    width: 8.33333333% !important;
+}
+
+.col-sm-2 {
+    flex: 0 0 auto !important;
+    width: 16.66666667% !important;
+}
+
+.col-sm-3 {
+    flex: 0 0 auto !important;
+    width: 25% !important;
+}
+
+.col-sm-4 {
+    flex: 0 0 auto !important;
+    width: 33.33333333% !important;
+}
+
+.col-sm-5 {
+    flex: 0 0 auto !important;
+    width: 41.66666667% !important;
+}
+
+.col-sm-6 {
+    flex: 0 0 auto !important;
+    width: 50% !important;
+}
+
+.col-sm-7 {
+    flex: 0 0 auto !important;
+    width: 58.33333333% !important;
+}
+
+.col-sm-8 {
+    flex: 0 0 auto !important;
+    width: 66.66666667% !important;
+}
+
+.col-sm-9 {
+    flex: 0 0 auto !important;
+    width: 75% !important;
+}
+
+.col-sm-10 {
+    flex: 0 0 auto !important;
+    width: 83.33333333% !important;
+}
+
+.col-sm-11 {
+    flex: 0 0 auto !important;
+    width: 91.66666667% !important;
+}
+
+.col-sm-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+// Medium breakpoint columns
+.col-md-1 {
+    flex: 0 0 auto !important;
+    width: 8.33333333% !important;
+}
+
+.col-md-2 {
+    flex: 0 0 auto !important;
+    width: 16.66666667% !important;
+}
+
+.col-md-3 {
+    flex: 0 0 auto !important;
+    width: 25% !important;
+}
+
+.col-md-4 {
+    flex: 0 0 auto !important;
+    width: 33.33333333% !important;
+}
+
+.col-md-5 {
+    flex: 0 0 auto !important;
+    width: 41.66666667% !important;
+}
+
+.col-md-6 {
+    flex: 0 0 auto !important;
+    width: 50% !important;
+}
+
+.col-md-7 {
+    flex: 0 0 auto !important;
+    width: 58.33333333% !important;
+}
+
+.col-md-8 {
+    flex: 0 0 auto !important;
+    width: 66.66666667% !important;
+}
+
+.col-md-9 {
+    flex: 0 0 auto !important;
+    width: 75% !important;
+}
+
+.col-md-10 {
+    flex: 0 0 auto !important;
+    width: 83.33333333% !important;
+}
+
+.col-md-11 {
+    flex: 0 0 auto !important;
+    width: 91.66666667% !important;
+}
+
+.col-md-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+// Large breakpoint columns
+.col-lg-1 {
+    flex: 0 0 auto !important;
+    width: 8.33333333% !important;
+}
+
+.col-lg-2 {
+    flex: 0 0 auto !important;
+    width: 16.66666667% !important;
+}
+
+.col-lg-3 {
+    flex: 0 0 auto !important;
+    width: 25% !important;
+}
+
+.col-lg-4 {
+    flex: 0 0 auto !important;
+    width: 33.33333333% !important;
+}
+
+.col-lg-5 {
+    flex: 0 0 auto !important;
+    width: 41.66666667% !important;
+}
+
+.col-lg-6 {
+    flex: 0 0 auto !important;
+    width: 50% !important;
+}
+
+.col-lg-7 {
+    flex: 0 0 auto !important;
+    width: 58.33333333% !important;
+}
+
+.col-lg-8 {
+    flex: 0 0 auto !important;
+    width: 66.66666667% !important;
+}
+
+.col-lg-9 {
+    flex: 0 0 auto !important;
+    width: 75% !important;
+}
+
+.col-lg-10 {
+    flex: 0 0 auto !important;
+    width: 83.33333333% !important;
+}
+
+.col-lg-11 {
+    flex: 0 0 auto !important;
+    width: 91.66666667% !important;
+}
+
+.col-lg-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+// XL breakpoint columns
+.col-xl-1 {
+    flex: 0 0 auto !important;
+    width: 8.33333333% !important;
+}
+
+.col-xl-2 {
+    flex: 0 0 auto !important;
+    width: 16.66666667% !important;
+}
+
+.col-xl-3 {
+    flex: 0 0 auto !important;
+    width: 25% !important;
+}
+
+.col-xl-4 {
+    flex: 0 0 auto !important;
+    width: 33.33333333% !important;
+}
+
+.col-xl-5 {
+    flex: 0 0 auto !important;
+    width: 41.66666667% !important;
+}
+
+.col-xl-6 {
+    flex: 0 0 auto !important;
+    width: 50% !important;
+}
+
+.col-xl-7 {
+    flex: 0 0 auto !important;
+    width: 58.33333333% !important;
+}
+
+.col-xl-8 {
+    flex: 0 0 auto !important;
+    width: 66.66666667% !important;
+}
+
+.col-xl-9 {
+    flex: 0 0 auto !important;
+    width: 75% !important;
+}
+
+.col-xl-10 {
+    flex: 0 0 auto !important;
+    width: 83.33333333% !important;
+}
+
+.col-xl-11 {
+    flex: 0 0 auto !important;
+    width: 91.66666667% !important;
+}
+
+.col-xl-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+// XXL breakpoint columns
+.col-xxl-1 {
+    flex: 0 0 auto !important;
+    width: 8.33333333% !important;
+}
+
+.col-xxl-2 {
+    flex: 0 0 auto !important;
+    width: 16.66666667% !important;
+}
+
+.col-xxl-3 {
+    flex: 0 0 auto !important;
+    width: 25% !important;
+}
+
+.col-xxl-4 {
+    flex: 0 0 auto !important;
+    width: 33.33333333% !important;
+}
+
+.col-xxl-5 {
+    flex: 0 0 auto !important;
+    width: 41.66666667% !important;
+}
+
+.col-xxl-6 {
+    flex: 0 0 auto !important;
+    width: 50% !important;
+}
+
+.col-xxl-7 {
+    flex: 0 0 auto !important;
+    width: 58.33333333% !important;
+}
+
+.col-xxl-8 {
+    flex: 0 0 auto !important;
+    width: 66.66666667% !important;
+}
+
+.col-xxl-9 {
+    flex: 0 0 auto !important;
+    width: 75% !important;
+}
+
+.col-xxl-10 {
+    flex: 0 0 auto !important;
+    width: 83.33333333% !important;
+}
+
+.col-xxl-11 {
+    flex: 0 0 auto !important;
+    width: 91.66666667% !important;
+}
+
+.col-xxl-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+/*********************************/
+/*  DISPLAY UTILITY OVERRIDES    */
+/*===============================*/
+// Force desktop display values - hide responsive hide utilities
+.d-sm-none {
+    display: none !important;
+}
+
+.d-sm-inline {
+    display: inline !important;
+}
+
+.d-sm-inline-block {
+    display: inline-block !important;
+}
+
+.d-sm-block {
+    display: block !important;
+}
+
+.d-sm-grid {
+    display: grid !important;
+}
+
+.d-sm-table {
+    display: table !important;
+}
+
+.d-sm-table-cell {
+    display: table-cell !important;
+}
+
+.d-sm-table-row {
+    display: table-row !important;
+}
+
+.d-sm-flex {
+    display: flex !important;
+}
+
+.d-sm-inline-flex {
+    display: inline-flex !important;
+}
+
+.d-md-none {
+    display: none !important;
+}
+
+.d-md-inline {
+    display: inline !important;
+}
+
+.d-md-inline-block {
+    display: inline-block !important;
+}
+
+.d-md-block {
+    display: block !important;
+}
+
+.d-md-grid {
+    display: grid !important;
+}
+
+.d-md-table {
+    display: table !important;
+}
+
+.d-md-table-cell {
+    display: table-cell !important;
+}
+
+.d-md-table-row {
+    display: table-row !important;
+}
+
+.d-md-flex {
+    display: flex !important;
+}
+
+.d-md-inline-flex {
+    display: inline-flex !important;
+}
+
+.d-lg-none {
+    display: none !important;
+}
+
+.d-lg-inline {
+    display: inline !important;
+}
+
+.d-lg-inline-block {
+    display: inline-block !important;
+}
+
+.d-lg-block {
+    display: block !important;
+}
+
+.d-lg-grid {
+    display: grid !important;
+}
+
+.d-lg-table {
+    display: table !important;
+}
+
+.d-lg-table-cell {
+    display: table-cell !important;
+}
+
+.d-lg-table-row {
+    display: table-row !important;
+}
+
+.d-lg-flex {
+    display: flex !important;
+}
+
+.d-lg-inline-flex {
+    display: inline-flex !important;
+}
+
+.d-xl-none {
+    display: none !important;
+}
+
+.d-xl-inline {
+    display: inline !important;
+}
+
+.d-xl-inline-block {
+    display: inline-block !important;
+}
+
+.d-xl-block {
+    display: block !important;
+}
+
+.d-xl-grid {
+    display: grid !important;
+}
+
+.d-xl-table {
+    display: table !important;
+}
+
+.d-xl-table-cell {
+    display: table-cell !important;
+}
+
+.d-xl-table-row {
+    display: table-row !important;
+}
+
+.d-xl-flex {
+    display: flex !important;
+}
+
+.d-xl-inline-flex {
+    display: inline-flex !important;
+}
+
+.d-xxl-none {
+    display: none !important;
+}
+
+.d-xxl-inline {
+    display: inline !important;
+}
+
+.d-xxl-inline-block {
+    display: inline-block !important;
+}
+
+.d-xxl-block {
+    display: block !important;
+}
+
+.d-xxl-grid {
+    display: grid !important;
+}
+
+.d-xxl-table {
+    display: table !important;
+}
+
+.d-xxl-table-cell {
+    display: table-cell !important;
+}
+
+.d-xxl-table-row {
+    display: table-row !important;
+}
+
+.d-xxl-flex {
+    display: flex !important;
+}
+
+.d-xxl-inline-flex {
+    display: inline-flex !important;
+}
+
+/*********************************/
+/*  SECTION PADDING OVERRIDES    */
+/*===============================*/
+// Force desktop section padding
+.section {
+    padding: 100px 0 !important;
+}
+
+.section-two {
+    padding: 48px 0 !important;
+}
+
+/*********************************/
+/*  TITLE & TYPOGRAPHY OVERRIDES */
+/*===============================*/
+// Force desktop font sizes
+.title-heading {
+    .heading {
+        font-size: 48px !important;
+
+        &.sub-heading {
+            font-size: 30px !important;
+        }
+    }
+
+    .para-desc {
+        font-size: 17px !important;
+    }
+}
+
+.section-title {
+    .title {
+        font-size: 28px !important;
+    }
+}
+
+/*********************************/
+/*  HOME SECTION OVERRIDES       */
+/*===============================*/
+// Force desktop home section heights/padding
+.bg-home {
+    height: 100vh !important;
+    padding: 0 !important;
+}
+
+.bg-half-260 {
+    padding: 260px 0 !important;
+    height: auto !important;
+}
+
+.bg-half {
+    padding: 200px 0 100px !important;
+    height: auto !important;
+}
+
+.bg-half-170 {
+    padding: 170px 0 !important;
+    height: auto !important;
+}
+
+/*********************************/
+/*  FEATURES ABSOLUTE OVERRIDES  */
+/*===============================*/
+.features-absolute {
+    margin: -200px 0 0px !important;
+
+    &.subscribe-search {
+        margin: -120px 0 0px !important;
+    }
+}
+
+/*********************************/
+/*  SHAPE OVERRIDES              */
+/*===============================*/
+.shape {
+    bottom: -1px !important;
+}
+
+/*********************************/
+/*  BORDER RADIUS OVERRIDES      */
+/*===============================*/
+.sm-rounded-0 {
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
+}
+
+/*********************************/
+/*  VIDEO IFRAME OVERRIDES       */
+/*===============================*/
+[data-type] iframe,
+[data-type] video {
+    width: 640px !important;
+    height: 360px !important;
+}
+
+/*********************************/
+/*  MARGIN OVERRIDES             */
+/*===============================*/
+.mt-60 {
+    margin-top: 0 !important;
+}
+
+.margin-top-100 {
+    margin-top: 100px !important;
+}
+
+/*********************************/
+/*  NAVIGATION MENU OVERRIDES    */
+/*===============================*/
+// Force desktop navigation (always show full menu, never hamburger)
+#topnav {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    min-height: auto !important;
+
+    &.scroll,
+    &.nav-sticky {
+        background-color: $white !important;
+        box-shadow: $shadow !important;
+    }
+
+    .logo {
+        .l-dark {
+            display: none !important;
+        }
+
+        .l-light,
+        .logo-light-mode {
+            display: inline-block !important;
+        }
+
+        .big-logo {
+            display: block !important;
+        }
+
+        .mobile-logo {
+            display: none !important;
+        }
+    }
+
+    .container {
+        width: 100% !important;
+    }
+
+    .navbar-toggle {
+        display: none !important;
+    }
+
+    #navigation {
+        display: block !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: auto !important;
+        height: auto !important;
+        max-height: none !important;
+        padding-bottom: 0 !important;
+        overflow: visible !important;
+        border: none !important;
+        background-color: transparent !important;
+    }
+
+    .navigation-menu {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        float: none !important;
+
+        >li {
+            float: left !important;
+            display: block !important;
+            margin: 0 10px !important;
+
+            >a {
+                padding-top: 25px !important;
+                padding-bottom: 25px !important;
+                min-height: 62px !important;
+                color: $dark !important;
+            }
+
+            .submenu {
+                position: absolute !important;
+                top: 100% !important;
+                left: 0 !important;
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                margin-top: 10px !important;
+                padding: 15px 0 !important;
+                list-style: none !important;
+                min-width: 180px !important;
+                border-radius: 6px !important;
+                background-color: $white !important;
+                box-shadow: $shadow !important;
+
+                li {
+                    a {
+                        display: block !important;
+                        padding: 10px 20px !important;
+                    }
+                }
+
+                &.megamenu {
+                    width: 1116px !important;
+                    white-space: nowrap !important;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    position: fixed !important;
+                    top: auto !important;
+                    display: flex !important;
+
+                    >li {
+                        width: 20% !important;
+                    }
+                }
+            }
+
+            &:hover>.submenu,
+            &.has-submenu:hover>.submenu {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin-top: 0 !important;
+            }
+        }
+
+        .has-submenu {
+            .menu-arrow {
+                display: inline-block !important;
+                position: absolute !important;
+                right: -3px !important;
+                top: 32px !important;
+            }
+
+            .submenu .submenu-arrow {
+                display: inline-block !important;
+                position: absolute !important;
+                right: 20px !important;
+                top: 15px !important;
+                transform: rotate(-45deg) !important;
+            }
+        }
+    }
+
+    .buy-button {
+        float: right !important;
+        line-height: 74px !important;
+        padding-left: 15px !important;
+
+        .login-btn-primary {
+            display: none !important;
+        }
+
+        .login-btn-light {
+            display: inline-block !important;
+        }
+    }
+
+    .menu-extras {
+        float: right !important;
+    }
+}
+
+// When scrolled/sticky - update logo visibility
+#topnav.scroll,
+#topnav.nav-sticky {
+    .logo {
+        .l-dark {
+            display: inline-block !important;
+        }
+
+        .l-light {
+            display: none !important;
+        }
+    }
+
+    .navigation-menu>li>a {
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+    }
+
+    .buy-button {
+        .login-btn-primary {
+            display: inline-block !important;
+        }
+
+        .login-btn-light {
+            display: none !important;
+        }
+    }
+}
+
+// Light nav variant
+#topnav .navigation-menu.nav-light>li>a {
+    color: rgba($white, 0.5) !important;
+}
+
+#topnav .navigation-menu.nav-light>li.active>a,
+#topnav .navigation-menu.nav-light>li:hover>a {
+    color: $white !important;
+}
+
+#topnav.nav-sticky .navigation-menu.nav-light>li>a {
+    color: $dark !important;
+}
+
+#topnav.nav-sticky .navigation-menu.nav-light>li.active>a,
+#topnav.nav-sticky .navigation-menu.nav-light>li:hover>a {
+    color: $primary !important;
+}
+
+/*********************************/
+/*  TAGLINE OVERRIDES            */
+/*===============================*/
+.tagline {
+    display: block !important;
+}
+
+.tagline-height {
+    top: 48px !important;
+}
+
+/*********************************/
+/*  JOB POST LIST OVERRIDES      */
+/*===============================*/
+.job-post.job-post-list {
+    .bookmark {
+        position: static !important;
+    }
+
+    .w-full {
+        width: auto !important;
+    }
+
+    .w-310px {
+        width: 310px !important;
+    }
+
+    .w-250px {
+        width: 250px !important;
+    }
+
+    .w-100px {
+        width: 100px !important;
+    }
+
+    .w-130px {
+        width: 130px !important;
+    }
+}
+
+/*********************************/
+/*  WIDTH UTILITY OVERRIDES      */
+/*===============================*/
+.w-md-48 {
+    width: 12rem !important;
+}
+
+/*********************************/
+/*  FLEX DIRECTION OVERRIDES     */
+/*===============================*/
+// Force row direction on all screen sizes
+.flex-sm-row {
+    flex-direction: row !important;
+}
+
+.flex-md-row {
+    flex-direction: row !important;
+}
+
+.flex-lg-row {
+    flex-direction: row !important;
+}
+
+.flex-xl-row {
+    flex-direction: row !important;
+}
+
+.flex-xxl-row {
+    flex-direction: row !important;
+}
+
+.flex-sm-column {
+    flex-direction: column !important;
+}
+
+.flex-md-column {
+    flex-direction: column !important;
+}
+
+.flex-lg-column {
+    flex-direction: column !important;
+}
+
+.flex-xl-column {
+    flex-direction: column !important;
+}
+
+.flex-xxl-column {
+    flex-direction: column !important;
+}
+
+/*********************************/
+/*  ORDER UTILITY OVERRIDES      */
+/*===============================*/
+.order-sm-first {
+    order: -1 !important;
+}
+
+.order-sm-last {
+    order: 6 !important;
+}
+
+.order-sm-0 {
+    order: 0 !important;
+}
+
+.order-sm-1 {
+    order: 1 !important;
+}
+
+.order-sm-2 {
+    order: 2 !important;
+}
+
+.order-sm-3 {
+    order: 3 !important;
+}
+
+.order-sm-4 {
+    order: 4 !important;
+}
+
+.order-sm-5 {
+    order: 5 !important;
+}
+
+.order-md-first {
+    order: -1 !important;
+}
+
+.order-md-last {
+    order: 6 !important;
+}
+
+.order-md-0 {
+    order: 0 !important;
+}
+
+.order-md-1 {
+    order: 1 !important;
+}
+
+.order-md-2 {
+    order: 2 !important;
+}
+
+.order-md-3 {
+    order: 3 !important;
+}
+
+.order-md-4 {
+    order: 4 !important;
+}
+
+.order-md-5 {
+    order: 5 !important;
+}
+
+.order-lg-first {
+    order: -1 !important;
+}
+
+.order-lg-last {
+    order: 6 !important;
+}
+
+.order-lg-0 {
+    order: 0 !important;
+}
+
+.order-lg-1 {
+    order: 1 !important;
+}
+
+.order-lg-2 {
+    order: 2 !important;
+}
+
+.order-lg-3 {
+    order: 3 !important;
+}
+
+.order-lg-4 {
+    order: 4 !important;
+}
+
+.order-lg-5 {
+    order: 5 !important;
+}
+
+/*********************************/
+/*  TEXT ALIGNMENT OVERRIDES     */
+/*===============================*/
+.text-sm-start {
+    text-align: left !important;
+}
+
+.text-sm-end {
+    text-align: right !important;
+}
+
+.text-sm-center {
+    text-align: center !important;
+}
+
+.text-md-start {
+    text-align: left !important;
+}
+
+.text-md-end {
+    text-align: right !important;
+}
+
+.text-md-center {
+    text-align: center !important;
+}
+
+.text-lg-start {
+    text-align: left !important;
+}
+
+.text-lg-end {
+    text-align: right !important;
+}
+
+.text-lg-center {
+    text-align: center !important;
+}
+
+.text-xl-start {
+    text-align: left !important;
+}
+
+.text-xl-end {
+    text-align: right !important;
+}
+
+.text-xl-center {
+    text-align: center !important;
+}
+
+/*********************************/
+/*  JUSTIFY CONTENT OVERRIDES    */
+/*===============================*/
+.justify-content-sm-start {
+    justify-content: flex-start !important;
+}
+
+.justify-content-sm-end {
+    justify-content: flex-end !important;
+}
+
+.justify-content-sm-center {
+    justify-content: center !important;
+}
+
+.justify-content-sm-between {
+    justify-content: space-between !important;
+}
+
+.justify-content-sm-around {
+    justify-content: space-around !important;
+}
+
+.justify-content-sm-evenly {
+    justify-content: space-evenly !important;
+}
+
+.justify-content-md-start {
+    justify-content: flex-start !important;
+}
+
+.justify-content-md-end {
+    justify-content: flex-end !important;
+}
+
+.justify-content-md-center {
+    justify-content: center !important;
+}
+
+.justify-content-md-between {
+    justify-content: space-between !important;
+}
+
+.justify-content-md-around {
+    justify-content: space-around !important;
+}
+
+.justify-content-md-evenly {
+    justify-content: space-evenly !important;
+}
+
+.justify-content-lg-start {
+    justify-content: flex-start !important;
+}
+
+.justify-content-lg-end {
+    justify-content: flex-end !important;
+}
+
+.justify-content-lg-center {
+    justify-content: center !important;
+}
+
+.justify-content-lg-between {
+    justify-content: space-between !important;
+}
+
+.justify-content-lg-around {
+    justify-content: space-around !important;
+}
+
+.justify-content-lg-evenly {
+    justify-content: space-evenly !important;
+}
+
+/*********************************/
+/*  ALIGN ITEMS OVERRIDES        */
+/*===============================*/
+.align-items-sm-start {
+    align-items: flex-start !important;
+}
+
+.align-items-sm-end {
+    align-items: flex-end !important;
+}
+
+.align-items-sm-center {
+    align-items: center !important;
+}
+
+.align-items-sm-baseline {
+    align-items: baseline !important;
+}
+
+.align-items-sm-stretch {
+    align-items: stretch !important;
+}
+
+.align-items-md-start {
+    align-items: flex-start !important;
+}
+
+.align-items-md-end {
+    align-items: flex-end !important;
+}
+
+.align-items-md-center {
+    align-items: center !important;
+}
+
+.align-items-md-baseline {
+    align-items: baseline !important;
+}
+
+.align-items-md-stretch {
+    align-items: stretch !important;
+}
+
+.align-items-lg-start {
+    align-items: flex-start !important;
+}
+
+.align-items-lg-end {
+    align-items: flex-end !important;
+}
+
+.align-items-lg-center {
+    align-items: center !important;
+}
+
+.align-items-lg-baseline {
+    align-items: baseline !important;
+}
+
+.align-items-lg-stretch {
+    align-items: stretch !important;
+}
+
+/*********************************/
+/*  SPACING UTILITY OVERRIDES    */
+/*===============================*/
+// Force desktop margin values for responsive margin utilities
+.mt-sm-0 {
+    margin-top: 0 !important;
+}
+
+.mt-md-0 {
+    margin-top: 0 !important;
+}
+
+.mt-lg-0 {
+    margin-top: 0 !important;
+}
+
+.mb-sm-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-md-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-lg-0 {
+    margin-bottom: 0 !important;
+}
+
+.ms-sm-0 {
+    margin-left: 0 !important;
+}
+
+.ms-md-0 {
+    margin-left: 0 !important;
+}
+
+.ms-lg-0 {
+    margin-left: 0 !important;
+}
+
+.me-sm-0 {
+    margin-right: 0 !important;
+}
+
+.me-md-0 {
+    margin-right: 0 !important;
+}
+
+.me-lg-0 {
+    margin-right: 0 !important;
+}
+
+.pt-sm-0 {
+    padding-top: 0 !important;
+}
+
+.pt-md-0 {
+    padding-top: 0 !important;
+}
+
+.pt-lg-0 {
+    padding-top: 0 !important;
+}
+
+.pb-sm-0 {
+    padding-bottom: 0 !important;
+}
+
+.pb-md-0 {
+    padding-bottom: 0 !important;
+}
+
+.pb-lg-0 {
+    padding-bottom: 0 !important;
+}
+
+.ps-sm-0 {
+    padding-left: 0 !important;
+}
+
+.ps-md-0 {
+    padding-left: 0 !important;
+}
+
+.ps-lg-0 {
+    padding-left: 0 !important;
+}
+
+.pe-sm-0 {
+    padding-right: 0 !important;
+}
+
+.pe-md-0 {
+    padding-right: 0 !important;
+}
+
+.pe-lg-0 {
+    padding-right: 0 !important;
+}

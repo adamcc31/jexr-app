@@ -9,6 +9,7 @@
 .section {
     padding: 100px 0;
     position: relative;
+
     @media (max-width: 768px) {
         padding: 60px 0;
     }
@@ -55,26 +56,32 @@
 /*===============================*/
 .title-heading {
     line-height: 26px;
+
     .heading {
         font-size: 48px !important;
         letter-spacing: 1px;
+
         @media (max-width: 768px) {
             font-size: 40px !important;
         }
 
         &.sub-heading {
             font-size: 30px !important;
+
             @media (max-width: 768px) {
                 font-size: 26px !important;
             }
         }
     }
+
     .letter-spacing {
         letter-spacing: 1px;
     }
+
     .para-desc {
         font-size: 17px;
         letter-spacing: 0.5px;
+
         @media (max-width: 768px) {
             font-size: 16px !important;
         }
@@ -83,14 +90,16 @@
 
 .section-title {
     position: relative;
+
     .title {
         letter-spacing: 0.5px;
         font-size: 28px !important;
+
         @media (max-width: 768px) {
             font-size: 24px !important;
         }
     }
-} 
+}
 
 .para-desc {
     max-width: 600px;
@@ -116,9 +125,11 @@
     right: 0;
     bottom: -1px;
     left: 0;
+
     @media (max-width: 425px) {
         bottom: -4px;
     }
+
     &>svg {
         transform: scale(2);
         width: 100%;
@@ -151,7 +162,7 @@
     @media (max-width: 768px) {
         margin: -140px 0 0;
     }
-    
+
     &.subscribe-search {
         margin: -120px 0 0px;
 
@@ -165,19 +176,27 @@
 /*         Video iframe          */
 /*===============================*/
 @media (max-width: 640px) {
-    [data-type] iframe, [data-type] video {
+
+    [data-type] iframe,
+    [data-type] video {
         width: 500px;
         height: 300px;
     }
 }
+
 @media (max-width: 425px) {
-    [data-type] iframe, [data-type] video {
+
+    [data-type] iframe,
+    [data-type] video {
         width: 360px;
         height: 260px;
     }
 }
+
 @media (max-width: 375px) {
-    [data-type] iframe, [data-type] video {
+
+    [data-type] iframe,
+    [data-type] video {
         width: 100%;
         height: auto;
     }
@@ -191,9 +210,11 @@
     height: 30px;
     width: auto;
 }
+
 .tobii__counter {
     font-size: 16px;
 }
+
 .tobii-zoom {
     display: block !important;
 }
@@ -213,20 +234,23 @@
 .profile-banner {
     position: relative;
     color: transparent;
+
     input {
         display: none;
     }
-    
+
     .icons {
         cursor: pointer;
         z-index: 1;
     }
 }
+
 .profile-banner {
     img {
         width: 1200px;
         height: 200px;
     }
+
     .profile-image-label {
         position: absolute;
         inset: 0;
@@ -257,16 +281,18 @@
 /*         Switcher pricing      */
 /*===============================*/
 .switcher-pricing {
-    .toggle, .toggler {
+
+    .toggle,
+    .toggler {
         display: inline-block;
         vertical-align: middle;
     }
-    
+
     .toggler {
         transition: all 0.5s ease;
         font-weight: bold;
     }
-    
+
     .toggler--is-active {
         color: $primary !important;
     }
@@ -280,89 +306,95 @@
     }
 }
 
-.hide{
+.hide {
     display: none;
 }
-ul li{
+
+ul li {
     -webkit-margin-start: 0.25rem;
-            margin-inline-start: 0.25rem;
-  }
+    margin-inline-start: 0.25rem;
+}
+
 //   ul li:first-child{
 //     -webkit-margin-start: 0px;
 //             margin-inline-start: 0px;
 //   }
-  /*Select 2*/ 
-.css-13cymwt-control{
+/*Select 2*/
+.css-13cymwt-control {
     border-color: transparent !important;
     border-style: none !important;
     background-color: $light !important;
     height: 60px !important;
-  }
-  
-  .css-t3ipsp-control {
+}
+
+.css-t3ipsp-control {
     border-color: transparent !important;
     background-color: $light !important;
     height: 60px !important;
-  }
-  
-  .css-1u9des2-indicatorSeparator{
+}
+
+.css-1u9des2-indicatorSeparator {
     display: none !important;
-  }
-  
-  .css-1fdsijx-ValueContainer{
+}
+
+.css-1fdsijx-ValueContainer {
     padding: 0px !important;
-  }
-  
-  .css-qbdosj-Input {
+}
+
+.css-qbdosj-Input {
     margin: 0 !important;
     padding: 0px !important;
-  }
-  
-  .css-13cymwt-control:hover,
-  .css-13cymwt-control:focus,
-  .css-t3ipsp-control:hover,
-  .css-t3ipsp-control:focus{
+}
+
+.css-13cymwt-control:hover,
+.css-13cymwt-control:focus,
+.css-t3ipsp-control:hover,
+.css-t3ipsp-control:focus {
     border-color: transparent !important;
     border-style: none !important;
     box-shadow: none !important;
     background-color: $light !important;
-  }
-  
-  .css-1dimb5e-singleValue{
+}
+
+.css-1dimb5e-singleValue {
     color: $dark !important;
-  }
-  
-  .css-1nmdiq5-menu{
+}
+
+.css-1nmdiq5-menu {
     z-index: 999;
     border-radius: 5px;
     border-style: none !important;
     background-color: $white !important;
     box-shadow: $shadow;
     color: $dark !important;
-  }
-  .css-1nmdiq5-menu .css-1n6sfyn-MenuList::-webkit-scrollbar {
+}
+
+.css-1nmdiq5-menu .css-1n6sfyn-MenuList::-webkit-scrollbar {
     display: none;
-  }
-  
-  .css-13cymwt-control:after,
-  .css-13cymwt-control:before{
+}
+
+.css-13cymwt-control:after,
+.css-13cymwt-control:before {
     box-shadow: $shadow !important;
-  }
-  .css-1jqq78o-placeholder {
+}
+
+.css-1jqq78o-placeholder {
     margin-left: 48px !important;
 }
 
 
-/*Select 2*/ 
-.css-13cymwt-control{
+/*Select 2*/
+.css-13cymwt-control {
     background-color: $light !important;
 }
-.css-1dimb5e-singleValue{
+
+.css-1dimb5e-singleValue {
     color: $dark !important;
-  }
-  .css-13cymwt-control:hover,
-  .css-13cymwt-control:focus,
-  .css-t3ipsp-control:hover,
-  .css-t3ipsp-control:focus{
+}
+
+.css-13cymwt-control:hover,
+.css-13cymwt-control:focus,
+.css-t3ipsp-control:hover,
+.css-t3ipsp-control:focus {
     background-color: $light !important;
-  }
+}

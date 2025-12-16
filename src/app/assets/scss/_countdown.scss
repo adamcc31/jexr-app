@@ -2,6 +2,7 @@
 // _countdown.scss
 //
 @use "variables" as *;
+
 /*********************************/
 /*         Countdown             */
 /*===============================*/
@@ -11,10 +12,12 @@
         margin: 30px 10px 10px;
         color: $white;
         text-align: center;
+
         .count-number {
             font-size: 40px;
             line-height: 95px;
         }
+
         .count-head {
             display: block;
             position: relative;
@@ -49,7 +52,7 @@
     color: $white;
     font-size: 56px;
     letter-spacing: 1px;
-    
+
     .indicator {
         font-size: 18px;
     }

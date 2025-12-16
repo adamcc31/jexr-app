@@ -2,6 +2,7 @@
 // _blog.scss
 //
 @use "variables" as *;
+
 /*********************************/
 /*         Blog                  */
 /*===============================*/
@@ -11,12 +12,14 @@
             transition: all 0.5s ease;
         }
     }
+
     .blog-content {
-        .blog-tag{
+        .blog-tag {
             position: absolute;
             top: -12px;
         }
     }
+
     &:hover {
         .blog-image {
             img {
@@ -27,7 +30,7 @@
 
     .title,
     .read-more {
-        &:hover{
+        &:hover {
             color: $primary !important;
         }
     }
@@ -41,6 +44,7 @@
         background: $gray-100;
         font-size: 13px;
         transition: all 0.5s ease;
+
         &:hover {
             background: $primary;
             color: $white !important;

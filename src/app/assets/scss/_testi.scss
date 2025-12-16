@@ -10,6 +10,7 @@
 .tns-nav {
     text-align: center;
     margin-top: 10px;
+
     button {
         background: rgba($dark, 0.15);
         border: 2px solid rgba($dark, 0.15) !important;
@@ -18,6 +19,7 @@
         border: none;
         margin: 4px;
         padding: 0;
+
         &.tns-nav-active {
             padding: 2px;
             border-color: $primary !important;
@@ -27,6 +29,7 @@
 }
 
 .tns-controls {
+
     button[data-controls="prev"],
     button[data-controls="next"] {
         position: absolute;
@@ -42,14 +45,17 @@
         transition: all 0.5s ease;
         z-index: 1;
         box-shadow: $shadow-lg;
+
         &:hover {
             background: $primary;
             color: $white;
         }
     }
+
     button[data-controls="prev"] {
         left: 0;
     }
+
     button[data-controls="next"] {
         right: 0;
     }

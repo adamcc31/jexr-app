@@ -10,11 +10,13 @@
 .about-right {
     .img-one {
         max-width: 80%;
+
         .cta-video {
             position: absolute;
             top: 5%;
         }
     }
+
     .img-two {
         position: absolute;
         bottom: -10%;
@@ -37,6 +39,7 @@
 .about-right {
     display: flex;
     justify-content: end;
+
     .img-one {
         .cta-video {
             left: 5%;
