@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from 'next/navigation'
 
-import { LuSearch } from "../assets/icons/vander";
+import { LuSearch } from "../../assets/icons/vander";
 
 export default function Navbar({ navClass, navLight }) {
     let [isOpen, setMenu] = useState(true);
@@ -147,11 +147,14 @@ export default function Navbar({ navClass, navLight }) {
                             </ul>
                         </li>
 
+
+
                         <li className={manu === "/contactus" ? "active" : ""}><Link href="/contactus" className="sub-menu-item">Contact Us</Link></li>
+
                         <li className={`${["/aboutus", "/services", "/pricing", "/helpcenter-overview", "/helpcenter-faqs", "/helpcenter-guides", '/helpcenter-support', "/blogs", "/blog-sidebar", "/blog-detail", "/login", "/signup", "/reset-password", "/lock-screen", "/terms", "/privacy"].includes(manu) ? "active" : ""} has-submenu parent-menu-item`}>
-                            <Link href="#">Language</Link><span className="menu-arrow"></span>
+                            <Link href="#">言語</Link><span className="menu-arrow"></span>
                             <ul className="submenu">
-                                <li className={manu === "/jp" ? "active" : ""}><Link href="/jp" className="sub-menu-item">Japanese</Link></li>
+                                <li className={manu === "/jp" ? "active" : ""}><Link href="/jp" className="sub-menu-item">日本語</Link></li>
                                 <li className={manu === "/" ? "active" : ""}><Link href="/" className="sub-menu-item">English</Link></li>
                             </ul>
                         </li>
