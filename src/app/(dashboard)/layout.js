@@ -17,7 +17,8 @@ export default async function DashboardLayout({ children }) {
 
     // 2. Validate token with Backend
     try {
-        const res = await fetch('http://localhost:8080/v1/auth/me', {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
+        const res = await fetch(`${API_URL}/auth/me`, {
             headers: {
                 Authorization: `Bearer ${token.value}`,
             },
