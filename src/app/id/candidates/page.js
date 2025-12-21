@@ -3,20 +3,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiMapPin } from "react-icons/fi";
 
-import Navbar from "../../componants/navbar";
-import FormSelect from "../../componants/formSelect";
-import AboutUs from "../../componants/aboutUs";
+import Navbar from "../../components/navbar";
+import FormSelect from "../../components/formSelect";
+import AboutUs from "../../components/aboutUs";
 import OurServices from "../../components/OurServices";
 import HighLevelConcept from "../../components/HighLevelConcept";
-import Footer from "../../componants/footer";
-import ScrollTop from "../../componants/scrollTop";
-import Faq from "../../componants/faq";
+import Footer from "../../components/footer";
+import ScrollTop from "../../components/scrollTop";
+import Faq from "../../components/faq";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { jobData } from "../../data/data";
 
-let lang = "jp";
 
 export default function IndexTwo() {
     return (
@@ -29,15 +28,15 @@ export default function IndexTwo() {
                     <div className="row mt-5 justify-content-center">
                         <div className="col-lg-10">
                             <div className="title-heading text-center">
-                                <h1 className="heading text-white fw-bold">{lang === "jp" ? "インドネシアでの<br />「即戦力」人材採用における、<br /> 貴社の信頼できるパートナー。" : "Your Trusted Partner for <br />Recruiting Japan Ready <br /> Talent in Indonesia."}</h1>
-                                <p className="para-desc text-white-50 mx-auto mb-0">{lang === "jp" ? "私たちは、高い規律とスキルを持ち、日本文化に親和性のあるインドネシア人材と日系企業様を繋ぎます。日本の業務基準へのスムーズな適応と、長期的な事業の成功をお約束します。" : "We connect Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent ensuring long-term success and seamless integration with Japanese work standards"}</p>
+                                <h1 className="heading text-white fw-bold">Your Trusted Partner for <br />Recruiting Japan Ready <br /> Talent in Indonesia.</h1>
+                                <p className="para-desc text-white-50 mx-auto mb-0">We connect Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent ensuring long-term success and seamless integration with Japanese work standards</p>
 
                                 <div className="d-md-flex justify-content-between align-items-center bg-white shadow rounded p-2 mt-4">
                                     <FormSelect />
                                 </div>
 
                                 <div className="mt-2">
-                                    <span className="text-white-50"><span className="text-white">注目の検索キーワード :</span> シニアエンジニア、熟練オペレーター、通訳 など</span>
+                                    <span className="text-white-50"><span className="text-white">Popular Searches :</span> Senior Engineer, Senior Operator, Translator and more</span>
                                 </div>
                             </div>
                         </div>
@@ -67,12 +66,12 @@ export default function IndexTwo() {
                                         <div className="content mt-3">
                                             <Link href={`/employer-profile/${item.id}`} className="title text-dark h5">{item.name}</Link>
 
-                                            <p className="text-muted mt-2 mb-0">未来を拓くデジタルソリューション</p>
+                                            <p className="text-muted mt-2 mb-0">Digital Marketing Solutions for Tomorrow</p>
                                         </div>
 
                                         <ul className="list-unstyled d-flex justify-content-between align-items-center border-top mt-3 pt-3 mb-0">
                                             <li className="text-muted d-inline-flex align-items-center"><FiMapPin className="fea icon-sm me-1 align-middle" />{item.country}</li>
-                                            <li className="list-inline-item text-primary fw-medium">{item.vacancy} 件の求人</li>
+                                            <li className="list-inline-item text-primary fw-medium">{item.vacancy} Jobs</li>
                                         </ul>
                                     </div>
                                 </div>

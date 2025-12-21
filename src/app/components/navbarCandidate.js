@@ -1,0 +1,162 @@
+'use client'
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from 'next/navigation'
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
+
+import { LuSearch, FiUser, FiSettings, FiLock, FiLogOut } from "../assets/icons/vander";
+
+export default function Navbar({ navClass, navLight }) {
+    let [isOpen, setMenu] = useState(true);
+    let [scroll, setScroll] = useState(false);
+    let [search, setSearch] = useState(false);
+    let [cartitem, setCartitem] = useState(false);
+
+    let [manu, setManu] = useState('');
+    let pathname = usePathname();
+
+    const searchRef = React.useRef(null);
+    const profileRef = React.useRef(null);
+
+    // Fetch candidate profile for profile picture
+    const { data: profileData } = useQuery({
+        queryKey: ["candidateNavbar"],
+        queryFn: async () => {
+            try {
+                const res = await apiClient.get("/candidates/me/verification");
+                return res.data.data;
+            } catch (error) {
+                return null;
+            }
+        },
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
+
+    const profilePicUrl = profileData?.verification?.profile_picture_url || "/images/team/01.jpg";
+
+    useEffect(() => {
+        setManu(pathname)
+        function scrollHandler() {
+            setScroll(window.scrollY > 50)
+        }
+        if (typeof window !== "undefined") {
+            window.addEventListener('scroll', scrollHandler);
+            window.scrollTo(0, 0);
+        }
+
+        // Close dropdowns when clicking outside
+        function handleClickOutside(event) {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setSearch(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setCartitem(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            window.removeEventListener('scroll', scrollHandler);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+
+    }, [setManu]);
+
+    const toggleMenu = () => {
+        setMenu(!isOpen)
+        if (document.getElementById("navigation")) {
+            const anchorArray = Array.from(document.getElementById("navigation").getElementsByTagName("a"));
+            anchorArray.forEach(element => {
+                element.addEventListener('click', (elem) => {
+                    const target = elem.target.getAttribute("href")
+                    if (target !== "") {
+                        if (elem.target.nextElementSibling) {
+                            var submenu = elem.target.nextElementSibling.nextElementSibling;
+                            submenu.classList.toggle('open');
+                        }
+                    }
+                })
+            });
+        }
+    }
+    return (
+        <header id="topnav" className={`${scroll ? 'nav-sticky' : ''} ${navClass}`}>
+            <div className="container">
+                <Link className="logo" href="/">
+                    <Image src='/images/logo-dark.png' width={120} height={30} className="logo-light-mode" alt="" />
+                    <Image src='/images/logo-light.png' width={120} height={30} className="logo-dark-mode" alt="" />
+                </Link>
+                <div className="menu-extras">
+                    <div className="menu-item">
+                        <Link href='#' className="navbar-toggle" id="isToggle" onClick={toggleMenu}>
+                            <div className="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
+
+                <ul className="buy-button list-inline mb-0">
+                    <li className="list-inline-item ps-1 mb-0">
+                        <div className="dropdown" ref={searchRef}>
+                            <button type="button" onClick={() => setSearch(!search)} className="dropdown-toggle btn btn-sm btn-icon btn-pills btn-primary">
+                                <LuSearch className="icons" />
+                            </button>
+                            <div style={{ display: search === true ? 'block' : 'none' }}>
+                                <div className={`dropdown-menu dd-menu dropdown-menu-end bg-white rounded border-0 mt-3 p-0 show`} style={{ width: '240px', position: 'absolute', right: '0' }}>
+                                    <div className="search-bar">
+                                        <div id="itemSearch" className="menu-search mb-0">
+                                            <form role="search" method="get" id="searchItemform" className="searchform">
+                                                <input type="text" className="form-control rounded border" name="s" id="searchItem" placeholder="Search..." />
+                                                <input type="submit" id="searchItemsubmit" value="Search" />
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li className="list-inline-item ps-1 mb-0">
+                        <div className="dropdown dropdown-primary" ref={profileRef}>
+                            <button type="button" onClick={() => setCartitem(!cartitem)} className="dropdown-toggle btn btn-sm btn-icon btn-pills btn-primary" style={{ overflow: 'hidden' }}>
+                                {profilePicUrl.startsWith('/') ? (
+                                    <Image src={profilePicUrl} height={32} width={32} className="img-fluid rounded-pill" alt="Profile" />
+                                ) : (
+                                    <img src={profilePicUrl} height={32} width={32} className="img-fluid rounded-pill" alt="Profile" style={{ objectFit: 'cover' }} />
+                                )}
+                            </button>
+                            <div style={{ display: cartitem === true ? 'block' : 'none' }}>
+                                <div className={` dropdown-menu dd-menu dropdown-menu-end bg-white rounded shadow border-0 mt-3 show`}>
+                                    <Link href="/candidate/profile" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiUser className="fea icon-sm me-2 align-middle" />Profile</Link>
+                                    <Link href="/candidate/settings" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiSettings className="fea icon-sm me-2 align-middle" />Settings</Link>
+                                    <div className="dropdown-divider border-top"></div>
+                                    <Link href="/auth/logout" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiLogOut className="fea icon-sm me-2 align-middle" />Logout</Link>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <div id="navigation">
+                    <ul className="navigation-menu nav-right">
+                        <li className={manu === "/candidate" ? "active" : ""}>
+                            <Link href="/candidate">Home</Link>
+                        </li>
+
+                        <li className={manu === "/candidate/jobs" ? "active" : ""}>
+                            <Link href="/candidate/jobs">Jobs</Link>
+                        </li>
+
+                        <li className={manu === "/contactus" ? "active" : ""}><Link href="/contactus" className="sub-menu-item">Contact Us</Link></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+    )
+}

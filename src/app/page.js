@@ -1,16 +1,15 @@
 import React from "react";
 
-import Navbar from "./componants/navbar";
-import FormSelect from "./componants/formSelect";
-import AboutUs from "./componants/aboutUs";
+import Navbar from "./components/navbar";
+import AboutUs from "./components/aboutUs";
 import OurServices from "./components/OurServices";
 import HowWeWork from "./components/HowWeWork";
 import OurMission from "./components/OurMission";
 import HighLevelConcept from "./components/HighLevelConcept";
 import ClientCTA from "./components/ClientCTA";
-import Footer from "./componants/footer";
-import ScrollTop from "./componants/scrollTop";
-import Faq from "./componants/faq";
+import Footer from "./components/footer";
+import ScrollTop from "./components/scrollTop";
+import Faq from "./components/faq";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -29,14 +28,6 @@ export default function IndexTwo() {
                             <div className="title-heading text-center">
                                 <h1 className="heading text-white fw-bold">Your Trusted Partner for <br />Recruiting Japan Ready <br /> Talent in Indonesia.</h1>
                                 <p className="para-desc text-white-50 mx-auto mb-0">We connect Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent ensuring long-term success and seamless integration with Japanese work standards</p>
-
-                                <div className="d-md-flex justify-content-between align-items-center bg-white shadow rounded p-2 mt-4">
-                                    <FormSelect />
-                                </div>
-
-                                <div className="mt-2">
-                                    <span className="text-white-50"><span className="text-white">Popular Searches :</span> Senior Engineer, Senior Operator, Translator and more</span>
-                                </div>
                             </div>
                         </div>
                     </div>

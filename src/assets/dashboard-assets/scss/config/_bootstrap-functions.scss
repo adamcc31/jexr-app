@@ -1,0 +1,360 @@
+// Bootstrap Functions (Local Copy)
+// These are needed for tint-color, shade-color, and shift-color functions
+// used in the dashboard's custom variables.
+
+@use "sass:math";
+@use "sass:color";
+
+// Tint a color: mix a color with white
+@function tint-color($color, $weight) {
+    @return color.mix(white, $color, $weight);
+}
+
+// Shade a color: mix a color with black
+@function shade-color($color, $weight) {
+    @return color.mix(black, $color, $weight);
+}
+
+// Convert a color to RGB values for use in CSS custom properties
+@function to-rgb($value) {
+    @return color.channel($value, "red", $space: rgb), color.channel($value, "green", $space: rgb), color.channel($value, "blue", $space: rgb);
+}
+
+// Shift a color: tint or shade based on weight sign
+@function shift-color($color, $weight) {
+    @if $weight >0 {
+        @return shade-color($color, $weight);
+    }
+
+    @else {
+        @return tint-color($color, -$weight);
+    }
+}
+
+// Color contrast function (simplified)
+@function color-contrast($background, $color-contrast-dark: #000, $color-contrast-light: #fff, $min-contrast-ratio: 4.5) {
+    $foregrounds: $color-contrast-light, $color-contrast-dark;
+    $max-ratio: 0;
+    $max-ratio-color: null;
+
+    @each $color in $foregrounds {
+        $contrast-ratio: contrast-ratio($background, $color);
+
+        @if $contrast-ratio >$min-contrast-ratio {
+            @return $color;
+        }
+
+        @else if $contrast-ratio >$max-ratio {
+            $max-ratio: $contrast-ratio;
+            $max-ratio-color: $color;
+        }
+    }
+
+    @if $max-ratio-color {
+        @return $max-ratio-color;
+    }
+
+    @else {
+        @return $color-contrast-light;
+    }
+}
+
+// Contrast ratio calculation
+@function contrast-ratio($background, $foreground) {
+    $l1: luminance($background);
+    $l2: luminance($foreground);
+
+    @if $l1 >$l2 {
+        @return math.div($l1 + 0.05, $l2 + 0.05);
+    }
+
+    @else {
+        @return math.div($l2 + 0.05, $l1 + 0.05);
+    }
+}
+
+// Luminance calculation
+@function luminance($color) {
+    $rgb: (
+        "r": color.channel($color, "red", $space: rgb),
+        "g": color.channel($color, "green", $space: rgb),
+        "b": color.channel($color, "blue", $space: rgb)
+    );
+
+@each $name, $value in $rgb {
+    $value: math.div($value, 255);
+    $new-value: null;
+
+    @if $value < 0.04045 {
+        $new-value: math.div($value, 12.92);
+    }
+
+    @else {
+        $new-value: math.pow(math.div($value + 0.055, 1.055), 2.4);
+    }
+
+    $rgb: map-merge($rgb, ($name: $new-value));
+}
+
+@return map-get($rgb, "r") * 0.2126+map-get($rgb, "g") * 0.7152+map-get($rgb, "b") * 0.0722;
+}
+
+// Divide function (for older Sass compatibility)
+@function divide($dividend, $divisor, $precision: 10) {
+    @return math.div($dividend, $divisor);
+}
+
+// Subtract function used by Bootstrap for calculating inner border-radius
+@function subtract($value1, $value2, $return-calc: true) {
+    @if $value1 ==null and $value2 ==null {
+        @return null;
+    }
+
+    @if $value1 ==null {
+        @return -$value2;
+    }
+
+    @if $value2 ==null {
+        @return $value1;
+    }
+
+    @if type-of($value1)==number and type-of($value2)==number and comparable($value1, $value2) {
+        @return $value1 - $value2;
+    }
+
+    @if $return-calc {
+        @return calc(#{$value1} - #{$value2});
+    }
+
+    @return null;
+}
+
+// Assert ascending function (for grid breakpoints)
+@mixin _assert-ascending($map, $name) {
+    $prev-key: null;
+    $prev-num: null;
+
+    @each $key, $num in $map {
+        @if $prev-num !=null and comparable($prev-num, $num) and $prev-num >=$num {
+            @warn "Invalid value for #{$name}: values must be in ascending order (#{$key}: #{$num} follows #{$prev-key}: #{$prev-num})";
+        }
+
+        $prev-key: $key;
+        $prev-num: $num;
+    }
+}
+
+// Assert starts at zero function
+@mixin _assert-starts-at-zero($map, $name) {
+    @if map-has-key($map, "xs") and map-get($map, "xs") !=0 {
+        @warn "Invalid value for #{$name}: Expected 'xs' to be 0";
+    }
+}
+
+// ============================================
+// Bootstrap Breakpoint Mixins
+// ============================================
+
+// Default grid breakpoints (can be overridden by variables)
+$grid-breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px) !default;
+
+// Breakpoint viewport sizes and media queries
+@function breakpoint-min($name, $breakpoints: $grid-breakpoints) {
+    $min: map-get($breakpoints, $name
+    );
+
+@if $min !=0 {
+    @return $min;
+}
+
+@else {
+    @return null;
+}
+}
+
+@function breakpoint-max($name, $breakpoints: $grid-breakpoints) {
+    $max: map-get($breakpoints, $name);
+
+    @if $max and $max >0 {
+        @return $max - .02;
+    }
+
+    @else {
+        @return null;
+    }
+}
+
+@function breakpoint-next($name, $breakpoints: $grid-breakpoints, $breakpoint-names: map-keys($breakpoints)) {
+    $n: index($breakpoint-names, $name);
+
+    @if $n !=null and $n < length($breakpoint-names) {
+        @return nth($breakpoint-names, $n + 1);
+    }
+
+    @else {
+        @return null;
+    }
+}
+
+@function breakpoint-infix($name, $breakpoints: $grid-breakpoints) {
+    @if breakpoint-min($name, $breakpoints)==null {
+        @return "";
+    }
+
+    @else {
+        @return "-#{$name}";
+    }
+}
+
+// Media of at least the minimum breakpoint width
+@mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($name, $breakpoints);
+
+    @if $min {
+        @media (min-width: $min) {
+            @content;
+        }
+    }
+
+    @else {
+        @content;
+    }
+}
+
+// Media of at most the maximum breakpoint width
+@mixin media-breakpoint-down($name, $breakpoints: $grid-breakpoints) {
+    $max: breakpoint-max($name, $breakpoints);
+
+    @if $max {
+        @media (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else {
+        @content;
+    }
+}
+
+// Media that spans multiple breakpoint widths
+@mixin media-breakpoint-between($lower, $upper, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($lower, $breakpoints);
+    $max: breakpoint-max($upper, $breakpoints);
+
+    @if $min !=null and $max !=null {
+        @media (min-width: $min) and (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else if $max ==null {
+        @include media-breakpoint-up($lower, $breakpoints) {
+            @content;
+        }
+    }
+
+    @else if $min ==null {
+        @include media-breakpoint-down($upper, $breakpoints) {
+            @content;
+        }
+    }
+}
+
+// Media between the breakpoint's minimum and maximum widths
+@mixin media-breakpoint-only($name, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($name, $breakpoints);
+    $next: breakpoint-next($name, $breakpoints);
+    $max: breakpoint-max($next, $breakpoints);
+
+    @if $min !=null and $max !=null {
+        @media (min-width: $min) and (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else if $max ==null {
+        @include media-breakpoint-up($name, $breakpoints) {
+            @content;
+        }
+    }
+
+    @else if $min ==null {
+        @include media-breakpoint-down($next, $breakpoints) {
+            @content;
+        }
+    }
+}
+
+// ============================================
+// Bootstrap Border-Radius Mixins
+// ============================================
+
+// Default border-radius variable (can be overridden)
+$border-radius: 0.375rem !default;
+$border-radius-sm: 0.25rem !default;
+$border-radius-lg: 0.5rem !default;
+$border-radius-xl: 1rem !default;
+$border-radius-xxl: 2rem !default;
+$border-radius-pill: 50rem !default;
+
+// Single side border-radius
+@mixin border-radius($radius: $border-radius, $fallback-border-radius: false) {
+    @if $fallback-border-radius {
+        border-radius: $fallback-border-radius;
+    }
+
+    border-radius: $radius;
+}
+
+@mixin border-top-radius($radius: $border-radius) {
+    border-top-left-radius: $radius;
+    border-top-right-radius: $radius;
+}
+
+@mixin border-end-radius($radius: $border-radius) {
+    border-top-right-radius: $radius;
+    border-bottom-right-radius: $radius;
+}
+
+@mixin border-bottom-radius($radius: $border-radius) {
+    border-bottom-right-radius: $radius;
+    border-bottom-left-radius: $radius;
+}
+
+@mixin border-start-radius($radius: $border-radius) {
+    border-top-left-radius: $radius;
+    border-bottom-left-radius: $radius;
+}
+
+// ============================================
+// Bootstrap Button Mixins
+// ============================================
+
+// Default button variables (can be overridden)
+$btn-padding-y: 0.375rem !default;
+$btn-padding-x: 0.75rem !default;
+$btn-font-size: 1rem !default;
+$btn-border-radius: $border-radius !default;
+
+$btn-padding-y-sm: 0.25rem !default;
+$btn-padding-x-sm: 0.5rem !default;
+$btn-font-size-sm: 0.875rem !default;
+$btn-border-radius-sm: $border-radius-sm !default;
+
+$btn-padding-y-lg: 0.5rem !default;
+$btn-padding-x-lg: 1rem !default;
+$btn-font-size-lg: 1.25rem !default;
+$btn-border-radius-lg: $border-radius-lg !default;
+
+// Button size mixin
+@mixin button-size($padding-y, $padding-x, $font-size, $border-radius) {
+    padding: $padding-y $padding-x;
+    font-size: $font-size;
+    border-radius: $border-radius;
+}

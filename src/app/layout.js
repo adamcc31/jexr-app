@@ -23,10 +23,16 @@ export const viewport = {
   userScalable: true,
 }
 
+import Providers from "./providers"
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={jakarta.variable}>{children}</body>
+      <body className={jakarta.variable}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   )
 }
