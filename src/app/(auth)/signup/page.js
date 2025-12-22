@@ -7,6 +7,33 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/api";
 import Script from "next/script";
 
+// Password validation requirements
+const PASSWORD_REQUIREMENTS = {
+    minLength: 8,
+    hasUppercase: /[A-Z]/,
+    hasNumber: /[0-9]/,
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
+};
+
+function validatePassword(password) {
+    const errors = [];
+
+    if (password.length < PASSWORD_REQUIREMENTS.minLength) {
+        errors.push(`At least ${PASSWORD_REQUIREMENTS.minLength} characters`);
+    }
+    if (!PASSWORD_REQUIREMENTS.hasUppercase.test(password)) {
+        errors.push('At least 1 uppercase letter');
+    }
+    if (!PASSWORD_REQUIREMENTS.hasNumber.test(password)) {
+        errors.push('At least 1 number');
+    }
+    if (!PASSWORD_REQUIREMENTS.hasSpecialChar.test(password)) {
+        errors.push('At least 1 special character (!@#$%^&*...)');
+    }
+
+    return errors;
+}
+
 function SignupForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -16,13 +43,14 @@ function SignupForm() {
     const notRegisteredError = searchParams.get('error') === 'not_registered';
 
     const [formData, setFormData] = useState({
-        name: '',
         email: redirectedEmail, // Pre-fill email if coming from forgot-password
         password: '',
+        confirmPassword: '',
         role: 'candidate' // Default role
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [passwordErrors, setPasswordErrors] = useState([]);
     const [showNotRegisteredAlert, setShowNotRegisteredAlert] = useState(notRegisteredError);
     const [captchaToken, setCaptchaToken] = useState('');
     const turnstileRef = useRef(null);
@@ -46,6 +74,15 @@ function SignupForm() {
             }
         };
     }, []);
+
+    // Validate password on change
+    useEffect(() => {
+        if (formData.password) {
+            setPasswordErrors(validatePassword(formData.password));
+        } else {
+            setPasswordErrors([]);
+        }
+    }, [formData.password]);
 
     const renderTurnstile = () => {
         if (window.turnstile && turnstileRef.current && !widgetId.current) {
@@ -74,6 +111,19 @@ function SignupForm() {
         e.preventDefault();
         setError('');
 
+        // Validate password strength
+        const pwdErrors = validatePassword(formData.password);
+        if (pwdErrors.length > 0) {
+            setError('Please fix password requirements below.');
+            return;
+        }
+
+        // Validate password match
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
+
         if (!captchaToken) {
             setError("Please complete the security check.");
             return;
@@ -82,8 +132,6 @@ function SignupForm() {
         setLoading(true);
 
         try {
-            // Note: 'name' is not yet handled by backend Register, but we can pass it if we update backend.
-            // Sending standard fields for now.
             const res = await apiClient.post('/auth/register', {
                 email: formData.email,
                 password: formData.password,
@@ -110,6 +158,9 @@ function SignupForm() {
             setLoading(false);
         }
     };
+
+    const isPasswordValid = passwordErrors.length === 0 && formData.password.length > 0;
+    const doPasswordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
 
     return (
         <section className="bg-home d-flex align-items-center" style={{ backgroundImage: "url('/images/hero/bg3.jpg')", backgroundPosition: 'center' }}>
@@ -154,20 +205,6 @@ function SignupForm() {
                                 {error && <div className="alert alert-danger py-2 small">{error}</div>}
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-semibold">Your Name</label>
-                                    <input
-                                        name="name"
-                                        id="name"
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Calvin Carlo"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mb-3">
                                     <label className="form-label fw-semibold">Your Email</label>
                                     <input
                                         name="email"
@@ -186,14 +223,50 @@ function SignupForm() {
                                     <input
                                         name="password"
                                         type="password"
-                                        className="form-control"
+                                        className={`form-control ${formData.password && (isPasswordValid ? 'is-valid' : 'is-invalid')}`}
                                         id="loginpass"
-                                        placeholder="Password"
+                                        placeholder="Create a strong password"
                                         value={formData.password}
                                         onChange={handleChange}
                                         required
-                                        minLength={6}
                                     />
+                                    {/* Password requirements indicator */}
+                                    {formData.password && passwordErrors.length > 0 && (
+                                        <div className="mt-2">
+                                            <small className="text-muted d-block mb-1">Password must contain:</small>
+                                            <ul className="list-unstyled small mb-0">
+                                                {[
+                                                    { check: formData.password.length >= 8, text: 'At least 8 characters' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasUppercase.test(formData.password), text: 'At least 1 uppercase letter' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasNumber.test(formData.password), text: 'At least 1 number' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasSpecialChar.test(formData.password), text: 'At least 1 special character' },
+                                                ].map((req, idx) => (
+                                                    <li key={idx} className={req.check ? 'text-success' : 'text-danger'}>
+                                                        {req.check ? '✓' : '✗'} {req.text}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold" htmlFor="confirmpass">Confirm Password</label>
+                                    <input
+                                        name="confirmPassword"
+                                        type="password"
+                                        className={`form-control ${formData.confirmPassword && (doPasswordsMatch ? 'is-valid' : 'is-invalid')}`}
+                                        id="confirmpass"
+                                        placeholder="Confirm your password"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {formData.confirmPassword && !doPasswordsMatch && (
+                                        <div className="invalid-feedback d-block">
+                                            Passwords do not match
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-check mb-3">
@@ -206,7 +279,11 @@ function SignupForm() {
                                     <div ref={turnstileRef}></div>
                                 </div>
 
-                                <button className="btn btn-primary w-100" type="submit" disabled={loading}>
+                                <button
+                                    className="btn btn-primary w-100"
+                                    type="submit"
+                                    disabled={loading || !isPasswordValid || !doPasswordsMatch}
+                                >
                                     {loading ? 'Registering...' : 'Register'}
                                 </button>
 
@@ -236,3 +313,4 @@ export default function Signup() {
         </Suspense>
     );
 }
+
