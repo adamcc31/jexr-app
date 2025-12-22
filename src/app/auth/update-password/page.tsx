@@ -6,6 +6,33 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
 
+// Password validation requirements (same as signup)
+const PASSWORD_REQUIREMENTS = {
+    minLength: 8,
+    hasUppercase: /[A-Z]/,
+    hasNumber: /[0-9]/,
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
+};
+
+function validatePassword(password: string): string[] {
+    const errors: string[] = [];
+
+    if (password.length < PASSWORD_REQUIREMENTS.minLength) {
+        errors.push(`At least ${PASSWORD_REQUIREMENTS.minLength} characters`);
+    }
+    if (!PASSWORD_REQUIREMENTS.hasUppercase.test(password)) {
+        errors.push('At least 1 uppercase letter');
+    }
+    if (!PASSWORD_REQUIREMENTS.hasNumber.test(password)) {
+        errors.push('At least 1 number');
+    }
+    if (!PASSWORD_REQUIREMENTS.hasSpecialChar.test(password)) {
+        errors.push('At least 1 special character (!@#$%^&*...)');
+    }
+
+    return errors;
+}
+
 function UpdatePasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -16,6 +43,7 @@ function UpdatePasswordContent() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [accessToken, setAccessToken] = useState('');
+    const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
     useEffect(() => {
         // Supabase redirects with tokens in the URL hash fragment
@@ -38,18 +66,29 @@ function UpdatePasswordContent() {
         }
     }, []);
 
-    const handleSubmit = async (e) => {
+    // Validate password on change
+    useEffect(() => {
+        if (newPassword) {
+            setPasswordErrors(validatePassword(newPassword));
+        } else {
+            setPasswordErrors([]);
+        }
+    }, [newPassword]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validate password strength
+        const pwdErrors = validatePassword(newPassword);
+        if (pwdErrors.length > 0) {
+            setError('Please fix password requirements below.');
+            return;
+        }
 
         // Validate passwords match
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match.');
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters.');
             return;
         }
 
@@ -70,12 +109,15 @@ function UpdatePasswordContent() {
             setTimeout(() => {
                 router.push('/login');
             }, 3000);
-        } catch (err) {
+        } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
         } finally {
             setLoading(false);
         }
     };
+
+    const isPasswordValid = passwordErrors.length === 0 && newPassword.length > 0;
+    const doPasswordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
     if (success) {
         return (
@@ -125,7 +167,7 @@ function UpdatePasswordContent() {
                                 <Link href="/"><Image src='/images/logo-dark.png' width={120} height={30} className="mb-4 d-block mx-auto" alt="" /></Link>
                                 <h6 className="mb-2 text-uppercase fw-semibold">Set New Password</h6>
 
-                                <p className="text-muted small mb-3">Enter your new password below.</p>
+                                <p className="text-muted small mb-3">Create a strong password for your account.</p>
 
                                 {error && <div className="alert alert-danger py-2 small">{error}</div>}
 
@@ -133,37 +175,55 @@ function UpdatePasswordContent() {
                                     <label className="form-label fw-semibold">New Password</label>
                                     <input
                                         type="password"
-                                        className="form-control"
-                                        placeholder="Enter new password"
+                                        className={`form-control ${newPassword && (isPasswordValid ? 'is-valid' : 'is-invalid')}`}
+                                        placeholder="Create a strong password"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         required
-                                        minLength={6}
                                         disabled={!accessToken}
                                     />
+                                    {/* Password requirements indicator */}
+                                    {newPassword && passwordErrors.length > 0 && (
+                                        <div className="mt-2">
+                                            <small className="text-muted d-block mb-1">Password must contain:</small>
+                                            <ul className="list-unstyled small mb-0">
+                                                {[
+                                                    { check: newPassword.length >= 8, text: 'At least 8 characters' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasUppercase.test(newPassword), text: 'At least 1 uppercase letter' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasNumber.test(newPassword), text: 'At least 1 number' },
+                                                    { check: PASSWORD_REQUIREMENTS.hasSpecialChar.test(newPassword), text: 'At least 1 special character' },
+                                                ].map((req, idx) => (
+                                                    <li key={idx} className={req.check ? 'text-success' : 'text-danger'}>
+                                                        {req.check ? '✓' : '✗'} {req.text}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">Confirm Password</label>
                                     <input
                                         type="password"
-                                        className="form-control"
+                                        className={`form-control ${confirmPassword && (doPasswordsMatch ? 'is-valid' : 'is-invalid')}`}
                                         placeholder="Confirm new password"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
-                                        minLength={6}
                                         disabled={!accessToken}
                                     />
-                                    {confirmPassword && newPassword !== confirmPassword && (
-                                        <small className="text-danger">Passwords do not match</small>
+                                    {confirmPassword && !doPasswordsMatch && (
+                                        <div className="invalid-feedback d-block">
+                                            Passwords do not match
+                                        </div>
                                     )}
                                 </div>
 
                                 <button
                                     className="btn btn-primary w-100"
                                     type="submit"
-                                    disabled={loading || !accessToken || newPassword !== confirmPassword}
+                                    disabled={loading || !accessToken || !isPasswordValid || !doPasswordsMatch}
                                 >
                                     {loading ? 'Resetting...' : 'Reset Password'}
                                 </button>
@@ -195,3 +255,4 @@ export default function UpdatePasswordPage() {
         </Suspense>
     );
 }
+
