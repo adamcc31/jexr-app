@@ -5,8 +5,10 @@ import "./assets/css/materialdesignicons.min.css"
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],  // Reduced from 7 to 4 weights
+  display: 'swap',  // Prevents FOIT, shows fallback font while loading
   variable: '--font-jakarta',
+  preload: true,
 })
 
 export const metadata = {
@@ -14,11 +16,11 @@ export const metadata = {
   description: 'J Expert - Your Specialist Partner for Japan-Ready Talent in Indonesia',
 }
 
-// Separate viewport export for Next.js 16
+// Mobile-first viewport configuration
 export const viewport = {
-  width: 1200,
-  initialScale: 0.3,
-  minimumScale: 0.1,
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
 }

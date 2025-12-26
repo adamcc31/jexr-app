@@ -7,14 +7,14 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import ScrollTop from "../components/scrollTop";
 
-import AvailableJobsSection from "@/components/discovery/AvailableJobsSection";
+import CandidatePreviewSection from "@/components/discovery/CandidatePreviewSection";
 
-export default function JobCategories() {
+export default function CandidatePool() {
     return (
         <>
             <Navbar navClass="defaultscroll sticky" navLight={true} />
 
-            {/* Hero Section - Preserved */}
+            {/* Hero Section */}
             <section
                 className="bg-half-170 d-table w-100"
                 style={{ backgroundImage: "url('/images/hero/bg.jpg')", backgroundPosition: 'top' }}
@@ -25,10 +25,10 @@ export default function JobCategories() {
                         <div className="col-12">
                             <div className="title-heading text-center">
                                 <h5 className="heading fw-semibold mb-0 sub-heading text-white title-dark">
-                                    Job Categories
+                                    Candidate Pool
                                 </h5>
                                 <p className="text-white-50 mt-2 mb-0">
-                                    Discover opportunities for both employers and candidates
+                                    Discover qualified candidates ready to work in Japan
                                 </p>
                             </div>
                         </div>
@@ -41,7 +41,7 @@ export default function JobCategories() {
                                     <Link href="/">J Expert</Link>
                                 </li>
                                 <li className="breadcrumb-item active" aria-current="page">
-                                    Categories
+                                    Candidate Pool
                                 </li>
                             </ul>
                         </nav>
@@ -58,9 +58,9 @@ export default function JobCategories() {
                 </div>
             </div>
 
-            {/* Available Jobs Section */}
-            <section className="section bg-light">
-                <AvailableJobsSection />
+            {/* Candidate Pool Section */}
+            <section className="section">
+                <CandidatePreviewSection />
             </section>
 
             <Footer top={undefined} />

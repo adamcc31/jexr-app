@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 import Navbar from "./components/navbar";
 import AboutUs from "./components/aboutUs";
@@ -20,9 +21,21 @@ export default function IndexTwo() {
             <SpeedInsights />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
 
-            <section className="bg-half-260 d-table w-100" style={{ backgroundImage: 'url("/images/hero/bg.jpg")' }}>
-                <div className="bg-overlay bg-primary-gradient-overlay"></div>
-                <div className="container">
+            <section className="bg-half-260 d-table w-100 position-relative overflow-hidden">
+                {/* Optimized Hero Image using Next.js Image */}
+                <Image
+                    src="/images/hero/bg.jpg"
+                    alt="Hero background"
+                    fill
+                    priority
+                    quality={75}
+                    sizes="100vw"
+                    style={{ objectFit: 'cover', zIndex: -2 }}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEEAQQDAAAAAAAAAAAAAQIDAAQFEQYSITFBE2Fx/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAaEQACAgMAAAAAAAAAAAAAAAABAgADESEx/9oADAMBAAIRAxEAPwCxw/k2R49mIby3VZY3QxyRyDasp8MCO4I+6uZbxC4m6W5LeIyLMIo4X2vhgaKKFi6CZQXpQ5n/2Q=="
+                />
+                <div className="bg-overlay bg-primary-gradient-overlay" style={{ zIndex: -1 }}></div>
+                <div className="container position-relative" style={{ zIndex: 1 }}>
                     <div className="row mt-5 justify-content-center">
                         <div className="col-lg-10">
                             <div className="title-heading text-center">

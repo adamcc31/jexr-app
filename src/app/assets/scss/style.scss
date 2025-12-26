@@ -44,5 +44,5 @@
 @use "contact";
 @use "footer";
 
-// Non-responsive overrides - forces desktop layout on all screen sizes
-@use "non-responsive";
+// Mobile-first responsive enhancements
+@use "mobile-first";
