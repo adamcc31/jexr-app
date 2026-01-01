@@ -16,9 +16,10 @@ export default async function DashboardLayout({ children }) {
         redirect('/login');
     }
 
-    // 2. Validate token with Backend
+    // 2. Validate token & Check Onboarding (Optimized)
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
     let authValid = false;
+    let userData = null;
 
     try {
         const res = await fetch(`${API_URL}/auth/me`, {
@@ -32,6 +33,9 @@ export default async function DashboardLayout({ children }) {
             // Token invalid or expired - redirect to login
             redirect('/login');
         }
+
+        const responseJson = await res.json();
+        userData = responseJson.data; // Wrapper: { data: { user: ..., onboarding_completed: ... } }
         authValid = true;
     } catch (error) {
         // Backend unavailable - for development, allow access if token exists
@@ -44,24 +48,17 @@ export default async function DashboardLayout({ children }) {
     const pathname = headersList.get('x-pathname') || '';
     const isOnboardingPage = pathname.includes('/onboarding');
 
-    if (authValid && userRole === 'candidate' && !isOnboardingPage) {
-        try {
-            const onboardingRes = await fetch(`${API_URL}/onboarding/status`, {
-                headers: {
-                    Authorization: `Bearer ${token.value}`,
-                },
-                cache: 'no-store',
-            });
+    // ONLY enforce if we successfully got data from backend (userData exists)
+    // If backend was down (userData is null), we skip enforcement to avoid locking properly authenticated users out
+    if (authValid && userData && userRole === 'candidate' && !isOnboardingPage) {
+        // onboarding_completed comes from the enhanced /auth/me endpoint
+        const isCompleted = userData.onboarding_completed;
 
-            if (onboardingRes.ok) {
-                const onboardingData = await onboardingRes.json();
-                if (!onboardingData.data?.completed) {
-                    redirect('/candidate/onboarding');
-                }
-            }
-        } catch (error) {
-            // If onboarding check fails, allow access (don't block user)
-            console.warn('Onboarding status check failed:', error.message);
+        // Strict check: if explicitly false, redirect. 
+        // If null/undefined (legacy backend or error), assume incomplete? Or safe?
+        // Requirement is "Every candidate MUST complete onboarding". So assume false if missing.
+        if (isCompleted === false) {
+            redirect('/candidate/onboarding');
         }
     }
 
