@@ -59,3 +59,41 @@ export async function uploadFile(file: File, bucket: 'CV' | 'JLPT' | 'Profile_Pi
     });
     return response.data.data.url;
 }
+
+// ============================================================================
+// Onboarding API Functions
+// ============================================================================
+
+import type { OnboardingStatus, LPK, OnboardingSubmitData } from '@/types/onboarding';
+
+/**
+ * Get onboarding completion status for the current user.
+ * GET /v1/onboarding/status
+ */
+export async function getOnboardingStatus(): Promise<OnboardingStatus> {
+    const response = await apiClient.get<{ data: OnboardingStatus }>('/onboarding/status');
+    return response.data.data;
+}
+
+/**
+ * Search LPK training centers for autocomplete.
+ * GET /v1/onboarding/lpk/search?q=<query>
+ */
+export async function searchLPK(query: string): Promise<LPK[]> {
+    if (!query || query.length < 2) {
+        return [];
+    }
+    const response = await apiClient.get<{ data: LPK[] }>('/onboarding/lpk/search', {
+        params: { q: query },
+    });
+    return response.data.data || [];
+}
+
+/**
+ * Submit onboarding wizard data and mark as complete.
+ * POST /v1/onboarding/complete
+ */
+export async function submitOnboarding(data: OnboardingSubmitData): Promise<void> {
+    await apiClient.post('/onboarding/complete', data);
+}
+

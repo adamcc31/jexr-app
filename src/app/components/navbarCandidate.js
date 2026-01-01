@@ -72,7 +72,7 @@ export default function Navbar({ navClass, navLight }) {
     return (
         <header id="topnav" className={`${scroll ? 'nav-sticky' : ''} ${navClass}`}>
             <div className="container">
-                <Link className="logo" href="/">
+                <Link className="logo" href="/candidate">
                     <Image src='/images/logo-dark.png' width={120} height={30} className="logo-light-mode" alt="" />
                     <Image src='/images/logo-light.png' width={120} height={30} className="logo-dark-mode" alt="" />
                 </Link>
