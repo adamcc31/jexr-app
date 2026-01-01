@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }) {
         }
 
         const responseJson = await res.json();
-        userData = responseJson.data; // Wrapper: { data: { user: ..., onboarding_completed: ... } }
+        userData = responseJson.data; // User object (now includes onboarding_completed)
         authValid = true;
     } catch (error) {
         // Backend unavailable - for development, allow access if token exists
