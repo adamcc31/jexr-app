@@ -64,7 +64,7 @@ export async function uploadFile(file: File, bucket: 'CV' | 'JLPT' | 'Profile_Pi
 // Onboarding API Functions
 // ============================================================================
 
-import type { OnboardingStatus, LPK, OnboardingSubmitData } from '@/types/onboarding';
+import type { OnboardingStatus, LPK, OnboardingSubmitData, InterestKey, LPKSelection, CompanyPreferenceKey } from '@/types/onboarding';
 
 /**
  * Get onboarding completion status for the current user.
@@ -72,6 +72,26 @@ import type { OnboardingStatus, LPK, OnboardingSubmitData } from '@/types/onboar
  */
 export async function getOnboardingStatus(): Promise<OnboardingStatus> {
     const response = await apiClient.get<{ data: OnboardingStatus }>('/onboarding/status');
+    return response.data.data;
+}
+
+/**
+ * Onboarding data response type for profile display
+ */
+export interface OnboardingData {
+    interests: InterestKey[];
+    lpk_selection: LPKSelection;
+    lpk_name?: string | null;
+    company_preferences: CompanyPreferenceKey[];
+    completed_at?: string | null;
+}
+
+/**
+ * Get saved onboarding data for profile display.
+ * GET /v1/onboarding/data
+ */
+export async function getOnboardingData(): Promise<OnboardingData> {
+    const response = await apiClient.get<{ data: OnboardingData }>('/onboarding/data');
     return response.data.data;
 }
 
