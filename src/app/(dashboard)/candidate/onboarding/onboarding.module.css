@@ -1,0 +1,376 @@
+/* Layout */
+.pageWrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    font-family: inherit;
+}
+
+@media (min-width: 992px) {
+    .pageWrapper {
+        flex-direction: row;
+    }
+}
+
+/* Left Panel - Hero */
+.heroPanel {
+    display: none;
+    width: 50%;
+    position: relative;
+    background-color: #f1f5f9;
+}
+
+@media (min-width: 992px) {
+    .heroPanel {
+        display: flex;
+    }
+}
+
+.heroImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heroOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 3rem;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
+}
+
+.quote {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 450px;
+}
+
+/* Right Panel - Form */
+.formPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .formPanel {
+        width: 50%;
+    }
+}
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .scrollArea {
+        padding: 3rem 4rem;
+    }
+}
+
+.contentWrapper {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Typography */
+.stepIndicator {
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.subtitle {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+}
+
+.question {
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.error {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    color: #b91c1c;
+    font-size: 0.875rem;
+}
+
+/* Form Elements */
+.optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.optionCard {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.optionCard:hover:not(:disabled) {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.optionCard.checked {
+    background-color: #f8fafc;
+    border-color: #0f172a;
+}
+
+.optionCard:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.checkbox.checked {
+    border-color: #0f172a;
+    background-color: #0f172a;
+}
+
+.checkboxIcon {
+    width: 12px;
+    height: 12px;
+    color: white;
+}
+
+.radioDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #0f172a;
+}
+
+.labelContainer {
+    flex: 1;
+}
+
+.labelText {
+    display: block;
+    font-weight: 500;
+    color: #334155;
+}
+
+.optionCard.checked .labelText {
+    color: #0f172a;
+}
+
+.sublabelText {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.dividerLine {
+    flex: 1;
+    height: 1px;
+    background-color: #e2e8f0;
+}
+
+.dividerText {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.inputWrapper {
+    margin-left: 2rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.textInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.textInput:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Buttons */
+.buttonGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.primaryButton {
+    background-color: #0f172a;
+    color: white;
+    border: none;
+}
+
+.primaryButton:hover:not(:disabled) {
+    background-color: #1e293b;
+}
+
+.primaryButton:disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.secondaryButton {
+    background-color: white;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+.secondaryButton:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* Search/Dropdown */
+.dropdownWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.dropdownInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+}
+
+.dropdownInput:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-top: 0.5rem;
+    z-index: 50;
+}
+
+.dropdownItem {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dropdownItem:last-child {
+    border-bottom: none;
+}
+
+.dropdownItem:hover {
+    background-color: #f8fafc;
+}
+
+/* Mobile FAB */
+.mobileFab {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    background-color: #0f172a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 992px) {
+    .mobileFab {
+        display: none;
+    }
+}

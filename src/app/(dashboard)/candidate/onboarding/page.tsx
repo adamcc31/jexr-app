@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitOnboarding, searchLPK } from '@/lib/candidate-api';
-import SearchableDropdown from '@/components/onboarding/SearchableDropdown';
 import {
     type InterestKey,
     type CompanyPreferenceKey,
@@ -11,27 +10,25 @@ import {
     type LPKSelectionType,
     type OnboardingSubmitData,
 } from '@/types/onboarding';
+import styles from './onboarding.module.css';
 
 const TOTAL_STEPS = 3;
 
-/**
- * Onboarding Wizard - Professional Split Layout
- * Left: Hero image with quote | Right: Form content
- */
 export default function OnboardingPage() {
     const router = useRouter();
-
-    // Wizard State
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
+    // Form State
     const [interests, setInterests] = useState<InterestKey[]>([]);
     const [lpkSelectionType, setLpkSelectionType] = useState<LPKSelectionType>('list');
     const [selectedLPK, setSelectedLPK] = useState<LPK | null>(null);
     const [lpkOtherName, setLpkOtherName] = useState('');
     const [companyPreferences, setCompanyPreferences] = useState<CompanyPreferenceKey[]>([]);
+
+    // UI State
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Validation
     const canProceed = useCallback(() => {
         switch (currentStep) {
             case 1:
@@ -48,7 +45,6 @@ export default function OnboardingPage() {
         }
     }, [currentStep, interests, lpkSelectionType, selectedLPK, lpkOtherName, companyPreferences]);
 
-    // Navigation
     const handleBack = () => {
         if (currentStep > 1) {
             setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3);
@@ -90,7 +86,6 @@ export default function OnboardingPage() {
         }
     };
 
-    // Interest toggle (checkbox style multi-select)
     const handleInterestToggle = (key: InterestKey) => {
         if (key === 'none') {
             setInterests(interests.includes('none') ? [] : ['none']);
@@ -104,7 +99,6 @@ export default function OnboardingPage() {
         }
     };
 
-    // Company preference toggle
     const handlePreferenceToggle = (key: CompanyPreferenceKey) => {
         if (companyPreferences.includes(key)) {
             setCompanyPreferences(companyPreferences.filter((p) => p !== key));
@@ -113,7 +107,6 @@ export default function OnboardingPage() {
         }
     };
 
-    // Step content configuration
     const stepConfig = {
         1: {
             title: 'Special Interest Survey',
@@ -133,56 +126,49 @@ export default function OnboardingPage() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className={styles.pageWrapper}>
             {/* Left Panel - Hero Image */}
-            <div className="hidden lg:flex lg:w-1/2 relative bg-slate-100">
+            <div className={styles.heroPanel}>
                 <img
                     src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
-                    alt="Professional at work"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    alt="Professional"
+                    className={styles.heroImage}
                 />
-                {/* Quote Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-slate-900/80 to-transparent">
-                    <p className="text-white text-lg font-light leading-relaxed max-w-md">
+                <div className={styles.heroOverlay}>
+                    <p className={styles.quote}>
                         &ldquo;Connecting Japanese businesses with exceptional Indonesian talent.&rdquo;
                     </p>
                 </div>
             </div>
 
             {/* Right Panel - Form Content */}
-            <div className="flex-1 lg:w-1/2 flex flex-col bg-white">
-                {/* Scrollable Content Area */}
-                <div className="flex-1 overflow-y-auto px-8 py-12 lg:px-16 xl:px-24">
-                    <div className="max-w-lg mx-auto">
-                        {/* Step Indicator */}
-                        <p className="text-blue-600 font-medium mb-8">
+            <div className={styles.formPanel}>
+                <div className={styles.scrollArea}>
+                    <div className={styles.contentWrapper}>
+                        <p className={styles.stepIndicator}>
                             Step {currentStep} of {TOTAL_STEPS}
                         </p>
 
-                        {/* Title & Subtitle */}
-                        <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                        <h1 className={styles.title}>
                             {stepConfig[currentStep].title}
                         </h1>
-                        <p className="text-slate-500 leading-relaxed mb-10">
+                        <p className={styles.subtitle}>
                             {stepConfig[currentStep].subtitle}
                         </p>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                            <div className={styles.error}>
                                 {error}
                             </div>
                         )}
 
-                        {/* Question */}
-                        <h2 className="text-slate-900 font-semibold mb-6">
+                        <h2 className={styles.question}>
                             {stepConfig[currentStep].question}
                         </h2>
 
-                        {/* Step 1: Interest Options */}
+                        {/* Step 1 */}
                         {currentStep === 1 && (
-                            <div className="space-y-3">
-                                {/* Interest checkboxes */}
+                            <div className={styles.optionsList}>
                                 <CheckboxOption
                                     checked={interests.includes('teacher')}
                                     disabled={interests.includes('none')}
@@ -202,14 +188,12 @@ export default function OnboardingPage() {
                                     label="Japanese Language Administration & Documentation"
                                 />
 
-                                {/* OR Divider */}
-                                <div className="flex items-center gap-4 py-4">
-                                    <div className="flex-1 h-px bg-slate-200" />
-                                    <span className="text-slate-400 text-sm uppercase tracking-wide">or</span>
-                                    <div className="flex-1 h-px bg-slate-200" />
+                                <div className={styles.divider}>
+                                    <div className={styles.dividerLine} />
+                                    <span className={styles.dividerText}>or</span>
+                                    <div className={styles.dividerLine} />
                                 </div>
 
-                                {/* None option */}
                                 <CheckboxOption
                                     checked={interests.includes('none')}
                                     onChange={() => handleInterestToggle('none')}
@@ -218,52 +202,47 @@ export default function OnboardingPage() {
                             </div>
                         )}
 
-                        {/* Step 2: LPK Selection */}
+                        {/* Step 2 */}
                         {currentStep === 2 && (
-                            <div className="space-y-3">
-                                {/* Select from list */}
+                            <div className={styles.optionsList}>
                                 <RadioOption
                                     checked={lpkSelectionType === 'list'}
                                     onChange={() => setLpkSelectionType('list')}
                                     label="Select from registered LPK list"
                                 />
                                 {lpkSelectionType === 'list' && (
-                                    <div className="ml-8 mt-3 mb-4">
-                                        <SearchableDropdown
+                                    <div className={styles.inputWrapper}>
+                                        <LPKAutocomplete
                                             value={selectedLPK}
-                                            placeholder="Type LPK name to search..."
                                             onSearch={searchLPK}
                                             onChange={setSelectedLPK}
                                         />
                                     </div>
                                 )}
 
-                                {/* Other */}
                                 <RadioOption
                                     checked={lpkSelectionType === 'other'}
                                     onChange={() => setLpkSelectionType('other')}
                                     label="Other (enter manually)"
                                 />
                                 {lpkSelectionType === 'other' && (
-                                    <div className="ml-8 mt-3 mb-4">
+                                    <div className={styles.inputWrapper}>
                                         <input
                                             type="text"
                                             value={lpkOtherName}
                                             onChange={(e) => setLpkOtherName(e.target.value)}
                                             placeholder="Enter LPK name..."
-                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className={styles.textInput}
                                         />
                                     </div>
                                 )}
 
-                                {/* OR Divider */}
-                                <div className="flex items-center gap-4 py-4">
-                                    <div className="flex-1 h-px bg-slate-200" />
-                                    <span className="text-slate-400 text-sm uppercase tracking-wide">or</span>
-                                    <div className="flex-1 h-px bg-slate-200" />
+                                <div className={styles.divider}>
+                                    <div className={styles.dividerLine} />
+                                    <span className={styles.dividerText}>or</span>
+                                    <div className={styles.dividerLine} />
                                 </div>
 
-                                {/* None */}
                                 <RadioOption
                                     checked={lpkSelectionType === 'none'}
                                     onChange={() => setLpkSelectionType('none')}
@@ -272,9 +251,9 @@ export default function OnboardingPage() {
                             </div>
                         )}
 
-                        {/* Step 3: Company Preferences */}
+                        {/* Step 3 */}
                         {currentStep === 3 && (
-                            <div className="space-y-3">
+                            <div className={styles.optionsList}>
                                 <CheckboxOption
                                     checked={companyPreferences.includes('pma')}
                                     onChange={() => handlePreferenceToggle('pma')}
@@ -293,28 +272,18 @@ export default function OnboardingPage() {
                                     label="100% Indonesian-owned company (Local)"
                                     sublabel="Companies fully owned by Indonesian investors"
                                 />
-
-                                <p className="text-slate-400 text-sm mt-6">
-                                    Select one or more options based on your preference
-                                </p>
                             </div>
                         )}
 
-                        {/* Navigation Buttons */}
-                        <div className="flex items-center gap-4 mt-10 pt-6 border-t border-slate-100">
+                        {/* Navigation */}
+                        <div className={styles.buttonGroup}>
                             {currentStep < TOTAL_STEPS ? (
                                 <>
                                     <button
                                         type="button"
                                         onClick={handleNext}
                                         disabled={!canProceed()}
-                                        className={`
-                                            px-6 py-3 rounded-lg font-medium transition-colors
-                                            ${canProceed()
-                                                ? 'bg-slate-900 text-white hover:bg-slate-800'
-                                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                            }
-                                        `}
+                                        className={`${styles.button} ${styles.primaryButton}`}
                                     >
                                         Continue
                                     </button>
@@ -322,7 +291,7 @@ export default function OnboardingPage() {
                                         <button
                                             type="button"
                                             onClick={handleBack}
-                                            className="px-6 py-3 rounded-lg font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                                            className={`${styles.button} ${styles.secondaryButton}`}
                                         >
                                             Back
                                         </button>
@@ -334,20 +303,14 @@ export default function OnboardingPage() {
                                         type="button"
                                         onClick={handleFinish}
                                         disabled={!canProceed() || isSubmitting}
-                                        className={`
-                                            px-6 py-3 rounded-lg font-medium transition-colors
-                                            ${canProceed() && !isSubmitting
-                                                ? 'bg-slate-900 text-white hover:bg-slate-800'
-                                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                            }
-                                        `}
+                                        className={`${styles.button} ${styles.primaryButton}`}
                                     >
                                         {isSubmitting ? 'Submitting...' : 'Submit Preferences'}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={handleBack}
-                                        className="px-6 py-3 rounded-lg font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                                        className={`${styles.button} ${styles.secondaryButton}`}
                                     >
                                         Back
                                     </button>
@@ -357,14 +320,14 @@ export default function OnboardingPage() {
                     </div>
                 </div>
 
-                {/* Back to top button (mobile) */}
+                {/* Mobile FAB */}
                 <button
                     type="button"
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="fixed bottom-6 right-6 w-12 h-12 bg-slate-900 text-white rounded-lg shadow-lg flex items-center justify-center lg:hidden"
+                    className={styles.mobileFab}
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
                     </svg>
                 </button>
             </div>
@@ -372,9 +335,7 @@ export default function OnboardingPage() {
     );
 }
 
-// ============================================================================
-// Checkbox Option Component
-// ============================================================================
+// Components
 
 interface CheckboxOptionProps {
     checked: boolean;
@@ -390,74 +351,104 @@ function CheckboxOption({ checked, disabled, onChange, label, sublabel }: Checkb
             type="button"
             onClick={onChange}
             disabled={disabled}
-            className={`
-                w-full flex items-start gap-4 p-4 rounded-lg border text-left transition-all
-                ${checked
-                    ? 'border-slate-900 bg-slate-50'
-                    : disabled
-                        ? 'border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed'
-                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                }
-            `}
+            className={`${styles.optionCard} ${checked ? styles.checked : ''}`}
         >
-            {/* Checkbox */}
-            <div className={`
-                w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors
-                ${checked ? 'border-slate-900 bg-slate-900' : 'border-slate-300'}
-            `}>
+            <div className={`${styles.checkbox} ${checked ? styles.checked : ''}`}>
                 {checked && (
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className={styles.checkboxIcon} fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                 )}
             </div>
-            {/* Label */}
-            <div>
-                <span className={`font-medium ${checked ? 'text-slate-900' : 'text-slate-700'}`}>
-                    {label}
-                </span>
-                {sublabel && (
-                    <p className="text-slate-500 text-sm mt-1">{sublabel}</p>
-                )}
+            <div className={styles.labelContainer}>
+                <span className={styles.labelText}>{label}</span>
+                {sublabel && <span className={styles.sublabelText}>{sublabel}</span>}
             </div>
         </button>
     );
 }
 
-// ============================================================================
-// Radio Option Component (for LPK selection)
-// ============================================================================
-
-interface RadioOptionProps {
-    checked: boolean;
-    onChange: () => void;
-    label: string;
-}
-
-function RadioOption({ checked, onChange, label }: RadioOptionProps) {
+function RadioOption({ checked, onChange, label }: { checked: boolean, onChange: () => void, label: string }) {
     return (
         <button
             type="button"
             onClick={onChange}
-            className={`
-                w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-all
-                ${checked
-                    ? 'border-slate-900 bg-slate-50'
-                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                }
-            `}
+            className={`${styles.optionCard} ${checked ? styles.checked : ''}`}
         >
-            {/* Radio dot */}
-            <div className={`
-                w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
-                ${checked ? 'border-slate-900' : 'border-slate-300'}
-            `}>
-                {checked && <div className="w-2.5 h-2.5 rounded-full bg-slate-900" />}
+            <div className={`${styles.checkbox} ${checked ? styles.checked : ''}`}>
+                {checked && <div className={styles.radioDot} />}
             </div>
-            {/* Label */}
-            <span className={`font-medium ${checked ? 'text-slate-900' : 'text-slate-700'}`}>
-                {label}
-            </span>
+            <div className={styles.labelContainer}>
+                <span className={styles.labelText}>{label}</span>
+            </div>
         </button>
+    );
+}
+
+function LPKAutocomplete({ value, onSearch, onChange }: { value: LPK | null, onSearch: (q: string) => Promise<LPK[]>, onChange: (lpk: LPK | null) => void }) {
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<LPK[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Sync query with value if provided
+    useEffect(() => {
+        if (value) {
+            setQuery(value.name);
+        }
+    }, [value]);
+
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (query && (!value || query !== value.name)) {
+                try {
+                    const data = await onSearch(query);
+                    setResults(data || []);
+                } catch (e) {
+                    setResults([]);
+                }
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [query, onSearch, value]);
+
+    const handleSelect = (lpk: LPK) => {
+        onChange(lpk);
+        setQuery(lpk.name);
+        setIsOpen(false);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value);
+        if (value && e.target.value !== value.name) {
+            onChange(null);
+        }
+        setIsOpen(true);
+    };
+
+    return (
+        <div className={styles.dropdownWrapper}>
+            <input
+                type="text"
+                value={query}
+                onChange={handleInputChange}
+                onFocus={() => setIsOpen(true)}
+                onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                placeholder="Type LPK name..."
+                className={styles.dropdownInput}
+            />
+            {isOpen && results.length > 0 && (
+                <div className={styles.dropdownMenu}>
+                    {results.map((lpk) => (
+                        <div
+                            key={lpk.id}
+                            className={styles.dropdownItem}
+                            onClick={() => handleSelect(lpk)}
+                        >
+                            {lpk.name}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
