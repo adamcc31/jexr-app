@@ -85,6 +85,13 @@ export async function middleware(request: NextRequest) {
     }
 
     // =====================================================
+    // PATHNAME HEADER FOR SERVER COMPONENTS
+    // Used by layout.js to check current path (e.g. for onboarding guard)
+    // =====================================================
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-pathname', path)
+
+    // =====================================================
     // ROLE-BASED ROUTE PROTECTION
     // Existing logic for dashboard access control
     // =====================================================
@@ -101,7 +108,11 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    return NextResponse.next()
+    return NextResponse.next({
+        request: {
+            headers: requestHeaders,
+        }
+    })
 }
 
 export const config = {
@@ -113,5 +124,8 @@ export const config = {
         '/forgot-password',
         // Role-based protection for employer dashboard
         '/dashboard-employer/:path*',
+        // Add candidate and admin routes so middleware runs for them
+        '/candidate/:path*',
+        '/admin/:path*',
     ],
 }
