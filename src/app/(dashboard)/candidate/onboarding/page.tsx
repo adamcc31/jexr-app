@@ -2,24 +2,21 @@
 
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { submitOnboarding } from '@/lib/candidate-api';
+import { submitOnboarding, searchLPK } from '@/lib/candidate-api';
+import SearchableDropdown from '@/components/onboarding/SearchableDropdown';
 import {
     type InterestKey,
     type CompanyPreferenceKey,
     type LPK,
     type LPKSelectionType,
     type OnboardingSubmitData,
-    INTEREST_OPTIONS,
-    COMPANY_PREFERENCE_OPTIONS,
 } from '@/types/onboarding';
-import SearchableDropdown from '@/components/onboarding/SearchableDropdown';
-import { searchLPK } from '@/lib/candidate-api';
 
 const TOTAL_STEPS = 3;
 
 /**
- * Immersive Onboarding Wizard
- * Full-screen, modern design with smooth transitions
+ * Onboarding Wizard - Professional Split Layout
+ * Left: Hero image with quote | Right: Form content
  */
 export default function OnboardingPage() {
     const router = useRouter();
@@ -93,7 +90,7 @@ export default function OnboardingPage() {
         }
     };
 
-    // Interest toggle handler
+    // Interest toggle (checkbox style multi-select)
     const handleInterestToggle = (key: InterestKey) => {
         if (key === 'none') {
             setInterests(interests.includes('none') ? [] : ['none']);
@@ -107,7 +104,7 @@ export default function OnboardingPage() {
         }
     };
 
-    // Company preference toggle handler
+    // Company preference toggle
     const handlePreferenceToggle = (key: CompanyPreferenceKey) => {
         if (companyPreferences.includes(key)) {
             setCompanyPreferences(companyPreferences.filter((p) => p !== key));
@@ -116,322 +113,351 @@ export default function OnboardingPage() {
         }
     };
 
-    // Step info
-    const stepInfo = [
-        { title: 'Minat Karir', subtitle: 'Pilih posisi yang Anda minati' },
-        { title: 'Riwayat LPK', subtitle: 'Tempat Anda belajar bahasa Jepang' },
-        { title: 'Tipe Perusahaan', subtitle: 'Preferensi tempat kerja ideal' },
-    ];
+    // Step content configuration
+    const stepConfig = {
+        1: {
+            title: 'Special Interest Survey',
+            subtitle: 'Find your fit talent in J-Expert Recruitment. Help us match you with the perfect opportunities by indicating your interest in specific roles.',
+            question: 'Are you interested in the following positions?',
+        },
+        2: {
+            title: 'LPK Training Background',
+            subtitle: 'Tell us about your Japanese language training background. This helps employers understand your educational journey.',
+            question: 'Where did you learn Japanese before coming to Japan?',
+        },
+        3: {
+            title: 'Company Type Preferences',
+            subtitle: 'Help us understand your ideal workplace. Select the types of companies you would prefer to work for.',
+            question: 'What type of company ownership do you prefer?',
+        },
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-hidden relative">
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-blue-500/20 to-transparent rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-radial from-purple-500/20 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" />
+        <div className="min-h-screen flex">
+            {/* Left Panel - Hero Image */}
+            <div className="hidden lg:flex lg:w-1/2 relative bg-slate-100">
+                <img
+                    src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                    alt="Professional at work"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Quote Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-slate-900/80 to-transparent">
+                    <p className="text-white text-lg font-light leading-relaxed max-w-md">
+                        &ldquo;Connecting Japanese businesses with exceptional Indonesian talent.&rdquo;
+                    </p>
+                </div>
             </div>
 
-            {/* Main Content */}
-            <div className="relative z-10 min-h-screen flex flex-col">
-                {/* Header */}
-                <header className="p-6 lg:p-8">
-                    <div className="flex items-center justify-between max-w-6xl mx-auto">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                                <span className="text-white font-bold text-lg">J</span>
-                            </div>
-                            <span className="text-white font-semibold text-xl hidden sm:block">J-Expert</span>
-                        </div>
+            {/* Right Panel - Form Content */}
+            <div className="flex-1 lg:w-1/2 flex flex-col bg-white">
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto px-8 py-12 lg:px-16 xl:px-24">
+                    <div className="max-w-lg mx-auto">
+                        {/* Step Indicator */}
+                        <p className="text-blue-600 font-medium mb-8">
+                            Step {currentStep} of {TOTAL_STEPS}
+                        </p>
 
-                        {/* Step Indicator Pills */}
-                        <div className="flex items-center gap-2">
-                            {[1, 2, 3].map((step) => (
-                                <div
-                                    key={step}
-                                    className={`
-                                        transition-all duration-500 rounded-full
-                                        ${step === currentStep
-                                            ? 'w-10 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg shadow-blue-500/50'
-                                            : step < currentStep
-                                                ? 'w-3 h-3 bg-blue-400'
-                                                : 'w-3 h-3 bg-white/20'
-                                        }
-                                    `}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </header>
+                        {/* Title & Subtitle */}
+                        <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                            {stepConfig[currentStep].title}
+                        </h1>
+                        <p className="text-slate-500 leading-relaxed mb-10">
+                            {stepConfig[currentStep].subtitle}
+                        </p>
 
-                {/* Content Area */}
-                <main className="flex-1 flex items-center justify-center px-6 py-8">
-                    <div className="w-full max-w-2xl">
-                        {/* Step Header */}
-                        <div className="text-center mb-10">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-blue-300 text-sm mb-6">
-                                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                    {currentStep}
-                                </span>
-                                Langkah {currentStep} dari {TOTAL_STEPS}
-                            </div>
-                            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 tracking-tight">
-                                {stepInfo[currentStep - 1].title}
-                            </h1>
-                            <p className="text-xl text-blue-200/80">
-                                {stepInfo[currentStep - 1].subtitle}
-                            </p>
-                        </div>
-
-                        {/* Error */}
+                        {/* Error Message */}
                         {error && (
-                            <div className="mb-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-500/30 rounded-2xl text-red-200 text-center">
+                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                                 {error}
                             </div>
                         )}
 
-                        {/* Step 1: Interests */}
-                        {currentStep === 1 && (
-                            <div className="space-y-4">
-                                {INTEREST_OPTIONS.filter((o) => o.key !== 'none').map((option) => (
-                                    <button
-                                        key={option.key}
-                                        type="button"
-                                        onClick={() => handleInterestToggle(option.key)}
-                                        disabled={interests.includes('none')}
-                                        className={`
-                                            w-full p-5 rounded-2xl text-left transition-all duration-300 transform
-                                            ${interests.includes(option.key)
-                                                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-500/30 scale-[1.02]'
-                                                : interests.includes('none')
-                                                    ? 'bg-white/5 text-white/40 cursor-not-allowed'
-                                                    : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 hover:scale-[1.01]'
-                                            }
-                                        `}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-lg font-medium">{option.label}</span>
-                                            {interests.includes(option.key) && (
-                                                <div className="w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
-                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </button>
-                                ))}
+                        {/* Question */}
+                        <h2 className="text-slate-900 font-semibold mb-6">
+                            {stepConfig[currentStep].question}
+                        </h2>
 
-                                {/* Divider */}
-                                <div className="flex items-center gap-4 py-2">
-                                    <div className="flex-1 h-px bg-white/20" />
-                                    <span className="text-white/40 text-sm">atau</span>
-                                    <div className="flex-1 h-px bg-white/20" />
+                        {/* Step 1: Interest Options */}
+                        {currentStep === 1 && (
+                            <div className="space-y-3">
+                                {/* Interest checkboxes */}
+                                <CheckboxOption
+                                    checked={interests.includes('teacher')}
+                                    disabled={interests.includes('none')}
+                                    onChange={() => handleInterestToggle('teacher')}
+                                    label="Teacher / Sensei"
+                                />
+                                <CheckboxOption
+                                    checked={interests.includes('translator')}
+                                    disabled={interests.includes('none')}
+                                    onChange={() => handleInterestToggle('translator')}
+                                    label="Translator / Interpreter"
+                                />
+                                <CheckboxOption
+                                    checked={interests.includes('admin')}
+                                    disabled={interests.includes('none')}
+                                    onChange={() => handleInterestToggle('admin')}
+                                    label="Japanese Language Administration & Documentation"
+                                />
+
+                                {/* OR Divider */}
+                                <div className="flex items-center gap-4 py-4">
+                                    <div className="flex-1 h-px bg-slate-200" />
+                                    <span className="text-slate-400 text-sm uppercase tracking-wide">or</span>
+                                    <div className="flex-1 h-px bg-slate-200" />
                                 </div>
 
-                                {/* None Option */}
-                                <button
-                                    type="button"
-                                    onClick={() => handleInterestToggle('none')}
-                                    className={`
-                                        w-full p-5 rounded-2xl text-left transition-all duration-300
-                                        ${interests.includes('none')
-                                            ? 'bg-slate-600 text-white ring-2 ring-slate-400'
-                                            : 'bg-white/5 text-white/70 hover:bg-white/10'
-                                        }
-                                    `}
-                                >
-                                    <span className="text-lg">Tidak tertarik pada 3 posisi tersebut</span>
-                                </button>
+                                {/* None option */}
+                                <CheckboxOption
+                                    checked={interests.includes('none')}
+                                    onChange={() => handleInterestToggle('none')}
+                                    label="Not interested in any of the above positions"
+                                />
                             </div>
                         )}
 
-                        {/* Step 2: LPK */}
+                        {/* Step 2: LPK Selection */}
                         {currentStep === 2 && (
-                            <div className="space-y-4">
-                                {/* Option: Select from List */}
-                                <div
-                                    onClick={() => setLpkSelectionType('list')}
-                                    className={`
-                                        p-6 rounded-2xl cursor-pointer transition-all duration-300
-                                        ${lpkSelectionType === 'list'
-                                            ? 'bg-gradient-to-r from-blue-500/30 to-cyan-500/30 ring-2 ring-blue-400'
-                                            : 'bg-white/10 hover:bg-white/15'
-                                        }
-                                    `}
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${lpkSelectionType === 'list' ? 'border-blue-400 bg-blue-400' : 'border-white/40'}`}>
-                                            {lpkSelectionType === 'list' && <div className="w-2 h-2 bg-white rounded-full" />}
-                                        </div>
-                                        <span className="text-white font-medium text-lg">Pilih dari daftar LPK</span>
+                            <div className="space-y-3">
+                                {/* Select from list */}
+                                <RadioOption
+                                    checked={lpkSelectionType === 'list'}
+                                    onChange={() => setLpkSelectionType('list')}
+                                    label="Select from registered LPK list"
+                                />
+                                {lpkSelectionType === 'list' && (
+                                    <div className="ml-8 mt-3 mb-4">
+                                        <SearchableDropdown
+                                            value={selectedLPK}
+                                            placeholder="Type LPK name to search..."
+                                            onSearch={searchLPK}
+                                            onChange={setSelectedLPK}
+                                        />
                                     </div>
-                                    {lpkSelectionType === 'list' && (
-                                        <div className="mt-4">
-                                            <SearchableDropdown
-                                                value={selectedLPK}
-                                                placeholder="Ketik nama LPK untuk mencari..."
-                                                onSearch={searchLPK}
-                                                onChange={setSelectedLPK}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                )}
 
-                                {/* Option: Other */}
-                                <div
-                                    onClick={() => setLpkSelectionType('other')}
-                                    className={`
-                                        p-6 rounded-2xl cursor-pointer transition-all duration-300
-                                        ${lpkSelectionType === 'other'
-                                            ? 'bg-gradient-to-r from-blue-500/30 to-cyan-500/30 ring-2 ring-blue-400'
-                                            : 'bg-white/10 hover:bg-white/15'
-                                        }
-                                    `}
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${lpkSelectionType === 'other' ? 'border-blue-400 bg-blue-400' : 'border-white/40'}`}>
-                                            {lpkSelectionType === 'other' && <div className="w-2 h-2 bg-white rounded-full" />}
-                                        </div>
-                                        <span className="text-white font-medium text-lg">Lainnya (tulis manual)</span>
-                                    </div>
-                                    {lpkSelectionType === 'other' && (
+                                {/* Other */}
+                                <RadioOption
+                                    checked={lpkSelectionType === 'other'}
+                                    onChange={() => setLpkSelectionType('other')}
+                                    label="Other (enter manually)"
+                                />
+                                {lpkSelectionType === 'other' && (
+                                    <div className="ml-8 mt-3 mb-4">
                                         <input
                                             type="text"
                                             value={lpkOtherName}
                                             onChange={(e) => setLpkOtherName(e.target.value)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            placeholder="Masukkan nama LPK..."
-                                            className="w-full mt-4 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            placeholder="Enter LPK name..."
+                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
-                                    )}
+                                    </div>
+                                )}
+
+                                {/* OR Divider */}
+                                <div className="flex items-center gap-4 py-4">
+                                    <div className="flex-1 h-px bg-slate-200" />
+                                    <span className="text-slate-400 text-sm uppercase tracking-wide">or</span>
+                                    <div className="flex-1 h-px bg-slate-200" />
                                 </div>
 
-                                {/* Option: None */}
-                                <div
-                                    onClick={() => setLpkSelectionType('none')}
-                                    className={`
-                                        p-6 rounded-2xl cursor-pointer transition-all duration-300
-                                        ${lpkSelectionType === 'none'
-                                            ? 'bg-slate-600/50 ring-2 ring-slate-400'
-                                            : 'bg-white/5 hover:bg-white/10'
-                                        }
-                                    `}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${lpkSelectionType === 'none' ? 'border-slate-400 bg-slate-400' : 'border-white/40'}`}>
-                                            {lpkSelectionType === 'none' && <div className="w-2 h-2 bg-white rounded-full" />}
-                                        </div>
-                                        <span className="text-white/80 font-medium text-lg">Saya tidak belajar di LPK</span>
-                                    </div>
-                                </div>
+                                {/* None */}
+                                <RadioOption
+                                    checked={lpkSelectionType === 'none'}
+                                    onChange={() => setLpkSelectionType('none')}
+                                    label="I did not study at an LPK"
+                                />
                             </div>
                         )}
 
                         {/* Step 3: Company Preferences */}
                         {currentStep === 3 && (
-                            <div className="space-y-4">
-                                {COMPANY_PREFERENCE_OPTIONS.map((option) => (
-                                    <button
-                                        key={option.key}
-                                        type="button"
-                                        onClick={() => handlePreferenceToggle(option.key)}
-                                        className={`
-                                            w-full p-5 rounded-2xl text-left transition-all duration-300 transform
-                                            ${companyPreferences.includes(option.key)
-                                                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-500/30 scale-[1.02]'
-                                                : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 hover:scale-[1.01]'
-                                            }
-                                        `}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <span className="text-lg font-medium block">{option.label}</span>
-                                                <span className={`text-sm mt-1 block ${companyPreferences.includes(option.key) ? 'text-white/80' : 'text-white/50'}`}>
-                                                    {option.description}
-                                                </span>
-                                            </div>
-                                            {companyPreferences.includes(option.key) && (
-                                                <div className="w-6 h-6 bg-white/30 rounded-full flex items-center justify-center flex-shrink-0 ml-4">
-                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </button>
-                                ))}
+                            <div className="space-y-3">
+                                <CheckboxOption
+                                    checked={companyPreferences.includes('pma')}
+                                    onChange={() => handlePreferenceToggle('pma')}
+                                    label="100% Japanese-owned company (PMA)"
+                                    sublabel="Companies fully owned by Japanese investors"
+                                />
+                                <CheckboxOption
+                                    checked={companyPreferences.includes('joint_venture')}
+                                    onChange={() => handlePreferenceToggle('joint_venture')}
+                                    label="Japan-Indonesia Joint Venture"
+                                    sublabel="Partnership between Japanese and Indonesian parties"
+                                />
+                                <CheckboxOption
+                                    checked={companyPreferences.includes('local')}
+                                    onChange={() => handlePreferenceToggle('local')}
+                                    label="100% Indonesian-owned company (Local)"
+                                    sublabel="Companies fully owned by Indonesian investors"
+                                />
 
-                                <p className="text-center text-blue-200/60 text-sm mt-6">
-                                    Pilih satu atau lebih sesuai preferensi Anda
+                                <p className="text-slate-400 text-sm mt-6">
+                                    Select one or more options based on your preference
                                 </p>
                             </div>
                         )}
-                    </div>
-                </main>
 
-                {/* Footer Navigation */}
-                <footer className="p-6 lg:p-8">
-                    <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-                        <button
-                            type="button"
-                            onClick={handleBack}
-                            disabled={currentStep === 1}
-                            className={`
-                                px-6 py-3 rounded-xl font-medium transition-all duration-300
-                                ${currentStep === 1
-                                    ? 'text-white/30 cursor-not-allowed'
-                                    : 'text-white hover:bg-white/10'
-                                }
-                            `}
-                        >
-                            ← Kembali
-                        </button>
-
-                        {currentStep < TOTAL_STEPS ? (
-                            <button
-                                type="button"
-                                onClick={handleNext}
-                                disabled={!canProceed()}
-                                className={`
-                                    px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform
-                                    ${canProceed()
-                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
-                                        : 'bg-white/10 text-white/40 cursor-not-allowed'
-                                    }
-                                `}
-                            >
-                                Lanjutkan →
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={handleFinish}
-                                disabled={!canProceed() || isSubmitting}
-                                className={`
-                                    px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform
-                                    ${canProceed() && !isSubmitting
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105'
-                                        : 'bg-white/10 text-white/40 cursor-not-allowed'
-                                    }
-                                `}
-                            >
-                                {isSubmitting ? (
-                                    <span className="flex items-center gap-2">
-                                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Menyimpan...
-                                    </span>
-                                ) : (
-                                    'Selesai ✓'
-                                )}
-                            </button>
-                        )}
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center gap-4 mt-10 pt-6 border-t border-slate-100">
+                            {currentStep < TOTAL_STEPS ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleNext}
+                                        disabled={!canProceed()}
+                                        className={`
+                                            px-6 py-3 rounded-lg font-medium transition-colors
+                                            ${canProceed()
+                                                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                            }
+                                        `}
+                                    >
+                                        Continue
+                                    </button>
+                                    {currentStep > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleBack}
+                                            className="px-6 py-3 rounded-lg font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                                        >
+                                            Back
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleFinish}
+                                        disabled={!canProceed() || isSubmitting}
+                                        className={`
+                                            px-6 py-3 rounded-lg font-medium transition-colors
+                                            ${canProceed() && !isSubmitting
+                                                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                            }
+                                        `}
+                                    >
+                                        {isSubmitting ? 'Submitting...' : 'Submit Preferences'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleBack}
+                                        className="px-6 py-3 rounded-lg font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Back
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
-                </footer>
+                </div>
+
+                {/* Back to top button (mobile) */}
+                <button
+                    type="button"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="fixed bottom-6 right-6 w-12 h-12 bg-slate-900 text-white rounded-lg shadow-lg flex items-center justify-center lg:hidden"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                </button>
             </div>
         </div>
+    );
+}
+
+// ============================================================================
+// Checkbox Option Component
+// ============================================================================
+
+interface CheckboxOptionProps {
+    checked: boolean;
+    disabled?: boolean;
+    onChange: () => void;
+    label: string;
+    sublabel?: string;
+}
+
+function CheckboxOption({ checked, disabled, onChange, label, sublabel }: CheckboxOptionProps) {
+    return (
+        <button
+            type="button"
+            onClick={onChange}
+            disabled={disabled}
+            className={`
+                w-full flex items-start gap-4 p-4 rounded-lg border text-left transition-all
+                ${checked
+                    ? 'border-slate-900 bg-slate-50'
+                    : disabled
+                        ? 'border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed'
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }
+            `}
+        >
+            {/* Checkbox */}
+            <div className={`
+                w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors
+                ${checked ? 'border-slate-900 bg-slate-900' : 'border-slate-300'}
+            `}>
+                {checked && (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                )}
+            </div>
+            {/* Label */}
+            <div>
+                <span className={`font-medium ${checked ? 'text-slate-900' : 'text-slate-700'}`}>
+                    {label}
+                </span>
+                {sublabel && (
+                    <p className="text-slate-500 text-sm mt-1">{sublabel}</p>
+                )}
+            </div>
+        </button>
+    );
+}
+
+// ============================================================================
+// Radio Option Component (for LPK selection)
+// ============================================================================
+
+interface RadioOptionProps {
+    checked: boolean;
+    onChange: () => void;
+    label: string;
+}
+
+function RadioOption({ checked, onChange, label }: RadioOptionProps) {
+    return (
+        <button
+            type="button"
+            onClick={onChange}
+            className={`
+                w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-all
+                ${checked
+                    ? 'border-slate-900 bg-slate-50'
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }
+            `}
+        >
+            {/* Radio dot */}
+            <div className={`
+                w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                ${checked ? 'border-slate-900' : 'border-slate-300'}
+            `}>
+                {checked && <div className="w-2.5 h-2.5 rounded-full bg-slate-900" />}
+            </div>
+            {/* Label */}
+            <span className={`font-medium ${checked ? 'text-slate-900' : 'text-slate-700'}`}>
+                {label}
+            </span>
+        </button>
     );
 }
