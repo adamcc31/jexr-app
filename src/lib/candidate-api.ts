@@ -114,6 +114,13 @@ export async function searchLPK(query: string): Promise<LPK[]> {
  * POST /v1/onboarding/complete
  */
 export async function submitOnboarding(data: OnboardingSubmitData): Promise<void> {
-    await apiClient.post('/onboarding/complete', data);
+    // Read token explicitly to ensure it's passed (bypass potential interceptor issues)
+    const token = typeof document !== 'undefined'
+        ? document.cookie.split('; ').find(row => row.startsWith('api_token='))?.split('=')[1]
+        : null;
+
+    await apiClient.post('/onboarding/complete', data, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
 }
 
