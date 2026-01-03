@@ -86,6 +86,10 @@ const nextConfig = {
               "img-src 'self' data: blob: https://*.supabase.co",
               // connect-src: API connections, WebSockets, Icon services
               "connect-src 'self' " + [
+                // Production API (Railway)
+                "https://jexr-api-production.up.railway.app",
+                "https://*.railway.app",
+                // Supabase
                 "https://*.supabase.co",
                 "wss://*.supabase.co",
                 "https://*.upstash.io",
