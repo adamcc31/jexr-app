@@ -177,24 +177,28 @@ export default function VerificationTable() {
                                         )}
                                     </td>
                                     {/* Submitted Date */}
-                                    <td>{new Date(v.submitted_at).toLocaleDateString()}</td>
+                                    <td>
+                                        {v.submitted_at && new Date(v.submitted_at).getFullYear() > 1970
+                                            ? new Date(v.submitted_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                                            : <span className="text-muted">-</span>
+                                        }
+                                    </td>
                                     {/* Status */}
                                     <td>{getStatusBadge(v.status)}</td>
                                     {/* Actions */}
                                     <td>
                                         <div className="d-flex gap-1">
-                                            {/* Review button for SUBMITTED status */}
-                                            {v.status === 'SUBMITTED' && (
-                                                <Link
-                                                    href={`/admin/account-verification/${v.id}`}
-                                                    className="btn btn-sm btn-primary"
-                                                >
-                                                    <IconifyIcon icon="solar:eye-bold" width={16} className="me-1" />
-                                                    Review
-                                                </Link>
-                                            )}
-                                            {/* Quick actions for PENDING status */}
-                                            {v.status === 'PENDING' && (
+                                            {/* See Detail button - always visible */}
+                                            <Link
+                                                href={`/admin/account-verification/${v.id}`}
+                                                className="btn btn-sm btn-outline-primary"
+                                                title="See Detail"
+                                            >
+                                                <IconifyIcon icon="solar:eye-bold" width={16} className="me-1" />
+                                                Detail
+                                            </Link>
+                                            {/* Quick Approve/Reject for PENDING or SUBMITTED status */}
+                                            {(v.status === 'PENDING' || v.status === 'SUBMITTED') && (
                                                 <>
                                                     <button
                                                         className="btn btn-sm btn-outline-success"
@@ -213,15 +217,6 @@ export default function VerificationTable() {
                                                         <IconifyIcon icon="solar:close-circle-bold" width={16} />
                                                     </button>
                                                 </>
-                                            )}
-                                            {/* View details for VERIFIED/REJECTED status */}
-                                            {(v.status === 'VERIFIED' || v.status === 'REJECTED') && (
-                                                <Link
-                                                    href={`/admin/account-verification/${v.id}`}
-                                                    className="btn btn-sm btn-outline-secondary"
-                                                >
-                                                    <IconifyIcon icon="solar:eye-linear" width={16} />
-                                                </Link>
                                             )}
                                         </div>
                                     </td>
