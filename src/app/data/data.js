@@ -704,7 +704,7 @@ export const contactData = [
         icon: FiPhone,
         title: 'Phone',
         desc: 'Start working with J Expert that can provide the best talent',
-        link: 'tel:+62 811-1927-3555'
+        link: 'tel:+62 811-8664-789'
     },
     {
         icon: FiMail,

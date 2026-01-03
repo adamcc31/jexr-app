@@ -114,13 +114,34 @@ export async function searchLPK(query: string): Promise<LPK[]> {
  * POST /v1/onboarding/complete
  */
 export async function submitOnboarding(data: OnboardingSubmitData): Promise<void> {
-    // Read token explicitly to ensure it's passed (bypass potential interceptor issues)
-    const token = typeof document !== 'undefined'
-        ? document.cookie.split('; ').find(row => row.startsWith('api_token='))?.split('=')[1]
-        : null;
-
-    await apiClient.post('/onboarding/complete', data, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
+    await apiClient.post('/onboarding/complete', data);
 }
 
+
+import type { CandidateWithFullDetails, Skill } from '@/types/candidate';
+
+/**
+ * Fetch the full candidate profile (Core + Details + Works + Skills).
+ * GET /v1/candidates/me/full
+ */
+export async function fetchFullCandidateProfile(): Promise<CandidateWithFullDetails> {
+    const response = await apiClient.get<{ data: CandidateWithFullDetails }>('/candidates/me/full');
+    return response.data.data;
+}
+
+/**
+ * Update the full candidate profile.
+ * PUT /v1/candidates/me/full
+ */
+export async function updateFullCandidateProfile(data: CandidateWithFullDetails): Promise<void> {
+    await apiClient.put('/candidates/me/full', data);
+}
+
+/**
+ * Fetch master skills list.
+ * GET /v1/candidates/skills
+ */
+export async function fetchMasterSkills(): Promise<Skill[]> {
+    const response = await apiClient.get<{ data: Skill[] }>('/candidates/skills');
+    return response.data.data;
+}

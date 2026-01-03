@@ -59,7 +59,7 @@ export interface AccountVerificationDetail extends AccountVerification {
     supporting_certificates_url?: string[];
 }
 
-// Japan work experience record
+// Japan work experience record (legacy)
 export interface JapanWorkExperience {
     id: number;
     account_verification_id: number;
@@ -72,10 +72,91 @@ export interface JapanWorkExperience {
     updated_at: string;
 }
 
-// Response from detail endpoint
+// Candidate Profile (education, career goals)
+export interface CandidateProfile {
+    id: number;
+    user_id: string;
+    title?: string;
+    bio?: string;
+    highest_education?: string;
+    major_field?: string;
+    desired_job_position?: string;
+    desired_job_position_other?: string;
+    preferred_work_environment?: string;
+    career_goals_3y?: string;
+    main_concerns_returning?: string[];
+    special_message?: string;
+    skills_other?: string;
+    resume_url?: string;
+}
+
+// Candidate Details (soft skills, achievements)
+export interface CandidateDetail {
+    user_id: string;
+    soft_skills_description?: string;
+    applied_work_values?: string;
+    major_achievements?: string;
+}
+
+// Unified Work Experience (all countries)
+export interface WorkExperience {
+    id: number;
+    user_id: string;
+    country_code: string;
+    experience_type: 'LOCAL' | 'OVERSEAS';
+    company_name: string;
+    job_title: string;
+    start_date: string;
+    end_date?: string;
+    description?: string;
+}
+
+// Master Skill
+export interface Skill {
+    id: number;
+    name: string;
+    category: string;
+}
+
+// Candidate Certificate (English certifications)
+export interface CandidateCertificate {
+    id: number;
+    user_id: string;
+    certificate_type: 'TOEFL' | 'IELTS' | 'TOEIC' | 'OTHER';
+    certificate_name?: string;
+    score_total?: number;
+    score_details?: Record<string, number>;
+    issued_date?: string;
+    expires_date?: string;
+    document_file_path: string;
+}
+
+// LPK Selection
+export interface LPKSelection {
+    lpk_id?: number;
+    other_name?: string;
+    none: boolean;
+}
+
+// Onboarding Data
+export interface OnboardingData {
+    interests?: string[];
+    lpk_selection?: LPKSelection;
+    lpk_name?: string;
+    company_preferences?: string[];
+    completed_at?: string;
+}
+
+// Comprehensive response from detail endpoint
 export interface VerificationDetailResponse {
     verification: AccountVerificationDetail;
     experiences: JapanWorkExperience[];
+    candidate_profile?: CandidateProfile;
+    candidate_details?: CandidateDetail;
+    work_experiences?: WorkExperience[];
+    skills?: Skill[];
+    certificates?: CandidateCertificate[];
+    onboarding_data?: OnboardingData;
 }
 
 export interface VerificationFilter {

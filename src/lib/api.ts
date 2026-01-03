@@ -49,10 +49,20 @@ apiClient.interceptors.response.use(
         const status = error.response ? error.response.status : null;
 
         if (status === 401) {
-            // 401 Unauthorized
-            // We do NOT redirect here because the Server Auth Guard handles protection.
-            // Instead, we log it or surface it so the UI can show a "Session Expired" message if needed.
-            console.warn('Unauthorized access - 401. Session might be expired.');
+            // 401 Unauthorized - Token expired or invalid
+            console.warn('Unauthorized access - 401. Redirecting to login...');
+
+            // Clear auth cookies (client-side)
+            if (typeof document !== 'undefined') {
+                document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = 'api_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+                // Redirect to login page (only on client-side)
+                // Use window.location for hard redirect to clear app state
+                if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+                    window.location.href = '/login?expired=true';
+                }
+            }
         }
 
         return Promise.reject(error);

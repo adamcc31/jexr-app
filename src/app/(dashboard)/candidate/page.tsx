@@ -46,30 +46,28 @@ function formatRelativeTime(dateString: string): string {
     return formatDate(dateString);
 }
 
-// Calculate profile completion
+// Calculate profile completion (MANDATORY fields only)
+// JLPT Certificate, Portfolio URL, Intro are OPTIONAL and do NOT affect completion
 function calculateProfileCompletion(v: CandidateVerification | undefined): { percentage: number; missing: string[] } {
     if (!v) return { percentage: 0, missing: ['Profile not started'] };
 
-    const fields = [
+    // MANDATORY fields for verification
+    const mandatoryFields = [
         { key: 'first_name', label: 'First Name', value: v.first_name },
         { key: 'last_name', label: 'Last Name', value: v.last_name },
         { key: 'profile_picture_url', label: 'Profile Picture', value: v.profile_picture_url },
         { key: 'occupation', label: 'Occupation', value: v.occupation },
         { key: 'phone', label: 'Phone', value: v.phone },
-        { key: 'intro', label: 'About/Intro', value: v.intro },
-        { key: 'cv_url', label: 'CV/Resume', value: v.cv_url },
-        { key: 'japanese_level', label: 'Japanese Level (JLPT)', value: v.japanese_level },
-        { key: 'japan_experience_duration', label: 'Japan Experience', value: v.japan_experience_duration },
         { key: 'birth_date', label: 'Date of Birth', value: v.birth_date },
         { key: 'domicile_city', label: 'Domicile City', value: v.domicile_city },
-        { key: 'main_job_fields', label: 'Main Job Fields', value: v.main_job_fields?.length },
-        { key: 'expected_salary', label: 'Expected Salary', value: v.expected_salary },
-        { key: 'preferred_locations', label: 'Preferred Locations', value: v.preferred_locations?.length },
+        { key: 'japan_experience_duration', label: 'Japan Experience', value: v.japan_experience_duration },
+        { key: 'cv_url', label: 'CV/Resume Document', value: v.cv_url }, // MANDATORY
+        // NOTE: japanese_level, japanese_certificate_url, portfolio_url, intro are OPTIONAL
     ];
 
-    const filled = fields.filter(f => f.value).length;
-    const missing = fields.filter(f => !f.value).map(f => f.label);
-    const percentage = Math.round((filled / fields.length) * 100);
+    const filled = mandatoryFields.filter(f => f.value).length;
+    const missing = mandatoryFields.filter(f => !f.value).map(f => f.label);
+    const percentage = Math.round((filled / mandatoryFields.length) * 100);
 
     return { percentage, missing };
 }
@@ -185,6 +183,31 @@ export default function CandidateDashboard() {
             <section className="section">
                 <div className="container">
                     <SkeletonStyles />
+
+                    {/* Incomplete Profile Warning Banner */}
+                    {!isLoadingProfile && percentage < 100 && (
+                        <div className="row mb-4">
+                            <div className="col-12">
+                                <div className="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
+                                    <i className="mdi mdi-alert-circle-outline text-danger me-3 fs-4"></i>
+                                    <div className="flex-grow-1">
+                                        <strong>Profile Incomplete</strong>
+                                        <p className="mb-0 small">
+                                            Your profile is {percentage}% complete. Complete all mandatory fields to become verified and apply for jobs.
+                                            {missing.length > 0 && (
+                                                <span className="d-block text-muted">
+                                                    Missing: {missing.slice(0, 3).join(', ')}{missing.length > 3 && ` +${missing.length - 3} more`}
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <Link href="/candidate/settings" className="btn btn-danger btn-sm ms-3">
+                                        <i className="mdi mdi-pencil me-1"></i> Complete Profile
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Profile Summary Card */}
                     <div className="row mb-4">
@@ -437,7 +460,7 @@ export default function CandidateDashboard() {
                                                                 <div className="text-center position-relative" style={{ zIndex: 2, flex: 1 }}>
                                                                     <div
                                                                         className={`rounded-circle mx-auto d-flex align-items-center justify-content-center ${isRejected ? 'bg-danger' :
-                                                                                currentIndex >= 1 ? 'bg-primary' : 'bg-light border'
+                                                                            currentIndex >= 1 ? 'bg-primary' : 'bg-light border'
                                                                             }`}
                                                                         style={{ width: 24, height: 24 }}
                                                                     >
@@ -455,7 +478,7 @@ export default function CandidateDashboard() {
                                                                 <div className="text-center position-relative" style={{ zIndex: 2, flex: 1 }}>
                                                                     <div
                                                                         className={`rounded-circle mx-auto d-flex align-items-center justify-content-center ${isRejected ? 'bg-danger' :
-                                                                                currentIndex >= 2 ? 'bg-success' : 'bg-light border'
+                                                                            currentIndex >= 2 ? 'bg-success' : 'bg-light border'
                                                                             }`}
                                                                         style={{ width: 24, height: 24 }}
                                                                     >

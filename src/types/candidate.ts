@@ -139,3 +139,76 @@ export function formatDateRange(startDate: string, endDate?: string | null): str
     const end = formatExperienceDate(endDate);
     return `${start} – ${end}`;
 }
+
+// ============================================================================
+// New Candidate Profile Module Types (Matching Backend)
+// ============================================================================
+
+export interface CandidateProfile {
+    id: number;
+    user_id: string;
+    title: string;
+    bio: string;
+    highest_education: string;
+    major_field: string;
+    desired_job_position: string;
+    desired_job_position_other: string;
+    preferred_work_environment: string;
+    career_goals_3y: string;
+    main_concerns_returning: string[]; // PG Array
+    special_message: string;
+    skills_other: string;
+    resume_url: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CandidateDetail {
+    user_id: string;
+    soft_skills_description: string;
+    applied_work_values: string;
+    major_achievements: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface WorkExperience {
+    id: number;
+    user_id: string;
+    country_code: string;
+    experience_type: 'LOCAL' | 'OVERSEAS';
+    company_name: string;
+    job_title: string;
+    start_date: string;
+    end_date?: string | null;
+    description: string;
+}
+
+export interface Skill {
+    id: number;
+    name: string;
+    category: string;
+}
+
+export type CertificateType = 'TOEFL' | 'IELTS' | 'TOEIC' | 'OTHER';
+
+export interface CandidateCertificate {
+    id?: number;
+    user_id?: string;
+    certificate_type: CertificateType;
+    certificate_name?: string; // For 'OTHER' type
+    score_total?: number;
+    score_details?: Record<string, unknown>;
+    issued_date?: string;
+    expires_date?: string;
+    document_file_path: string;
+}
+
+export interface CandidateWithFullDetails {
+    profile: CandidateProfile;
+    details: CandidateDetail;
+    work_experiences: WorkExperience[];
+    certificates: CandidateCertificate[];
+    skill_ids: number[]; // For payload
+    skills: Skill[];     // For display
+}
