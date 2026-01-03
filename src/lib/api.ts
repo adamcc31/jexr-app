@@ -24,14 +24,26 @@ export const apiClient = axios.create({
     },
 });
 
-// Request Interceptor - Add Authorization header
+// Request Interceptor - Add Authorization header and CSRF token
 apiClient.interceptors.request.use(
     (config) => {
-        // Get token from the non-HttpOnly api_token cookie
+        // Get auth token from the non-HttpOnly api_token cookie
         const token = getCookie('api_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // === SECURITY: CSRF Protection ===
+        // For state-changing requests, include the CSRF token from cookie
+        // The backend validates that X-CSRF-Token header matches csrf_token cookie
+        const method = config.method?.toUpperCase();
+        if (method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+            const csrfToken = getCookie('csrf_token');
+            if (csrfToken) {
+                config.headers['X-CSRF-Token'] = csrfToken;
+            }
+        }
+
         return config;
     },
     (error) => {
