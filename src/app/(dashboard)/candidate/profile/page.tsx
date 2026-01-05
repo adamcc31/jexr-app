@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 import NavbarDark from "../../../components/navbarCandidate";
 import Footer from "../../../components/footer";
@@ -12,6 +13,7 @@ import { useCandidateProfile, useRecommendedJobs } from "@/hooks/useCandidate";
 import type { JapanWorkExperience, VerificationStatus } from "@/types/candidate";
 import { formatExperienceDuration, formatDateRange } from "@/types/candidate";
 import type { Job } from "@/types/employer";
+import type { TFunction } from 'i18next';
 
 import {
     FiMail,
@@ -107,9 +109,10 @@ function JobCardSkeleton() {
 
 interface StatusBannerProps {
     status: VerificationStatus | undefined;
+    t: TFunction;
 }
 
-function StatusBanner({ status }: StatusBannerProps) {
+function StatusBanner({ status, t }: StatusBannerProps) {
     if (!status) return null;
 
     switch (status) {
@@ -117,21 +120,21 @@ function StatusBanner({ status }: StatusBannerProps) {
             return (
                 <div className="alert alert-info d-flex align-items-center mb-4" role="alert">
                     <FiClock className="me-2" />
-                    <span>Your profile is currently <strong>under review</strong>. We will notify you once it has been verified.</span>
+                    <span>{t('profile.underReviewBanner')}</span>
                 </div>
             );
         case 'REJECTED':
             return (
                 <div className="alert alert-danger d-flex align-items-center mb-4" role="alert">
                     <FiAlertCircle className="me-2" />
-                    <span>Your profile verification was <strong>rejected</strong>. Please update your information and resubmit.</span>
+                    <span>{t('profile.rejectedBanner')}</span>
                 </div>
             );
         case 'PENDING':
             return (
                 <div className="alert alert-warning d-flex align-items-center mb-4" role="alert">
                     <FiAlertCircle className="me-2" />
-                    <span>Your profile is <strong>incomplete</strong>. Please <Link href="/candidate/settings">complete your profile</Link> to submit for verification.</span>
+                    <span>{t('profile.pendingBanner')}</span>
                 </div>
             );
         default:
@@ -143,38 +146,38 @@ function StatusBanner({ status }: StatusBannerProps) {
 // Profile Not Found / Empty States
 // ============================================================================
 
-function ProfileNotFound() {
+function ProfileNotFound({ t }: { t: TFunction }) {
     return (
         <div className="text-center py-5">
             <FiAlertCircle className="fea icon-lg text-muted mb-3" />
-            <h5>Profile Not Found</h5>
-            <p className="text-muted">Your profile data could not be found. Please complete your profile setup.</p>
+            <h5>{t('profile.profileNotFound')}</h5>
+            <p className="text-muted">{t('profile.profileNotFoundDesc')}</p>
             <Link href="/candidate/settings" className="btn btn-primary mt-3">
-                Complete Profile
+                {t('common.completeProfile')}
             </Link>
         </div>
     );
 }
 
-function ProfileNotCompleted() {
+function ProfileNotCompleted({ t }: { t: TFunction }) {
     return (
         <div className="text-center py-5">
             <FiBriefcase className="fea icon-lg text-muted mb-3" />
-            <h5>Profile Not Completed</h5>
-            <p className="text-muted">You haven&apos;t completed your profile yet. Please fill in your details to be visible to employers.</p>
+            <h5>{t('profile.profileNotCompleted')}</h5>
+            <p className="text-muted">{t('profile.profileNotCompletedDesc')}</p>
             <Link href="/candidate/settings" className="btn btn-primary mt-3">
-                Complete Profile
+                {t('common.completeProfile')}
             </Link>
         </div>
     );
 }
 
-function ErrorState({ message }: { message?: string }) {
+function ErrorState({ message, t }: { message?: string; t: TFunction }) {
     return (
         <div className="text-center py-5">
             <FiAlertCircle className="fea icon-lg text-danger mb-3" />
-            <h5>Error Loading Profile</h5>
-            <p className="text-muted">{message || 'Failed to load profile data. Please try again later.'}</p>
+            <h5>{t('profile.errorLoadingProfile')}</h5>
+            <p className="text-muted">{message || t('profile.errorLoadingProfileDesc')}</p>
         </div>
     );
 }
@@ -230,7 +233,7 @@ function ExperienceItem({ experience, isLast }: ExperienceItemProps & { isLast?:
     );
 }
 
-function ExperienceSection({ experiences }: { experiences: JapanWorkExperience[] }) {
+function ExperienceSection({ experiences, t }: { experiences: JapanWorkExperience[]; t: TFunction }) {
     // Sort by start_date descending (most recent first)
     const sortedExperiences = [...experiences].sort((a, b) => {
         return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
@@ -243,8 +246,8 @@ function ExperienceSection({ experiences }: { experiences: JapanWorkExperience[]
                     <FiBriefcase className="text-white" style={{ fontSize: 18 }} />
                 </div>
                 <div>
-                    <h5 className="mb-0">Japan Work Experience</h5>
-                    <small className="text-muted">{sortedExperiences.length} position{sortedExperiences.length !== 1 ? 's' : ''}</small>
+                    <h5 className="mb-0">{t('profile.japanWorkExperience')}</h5>
+                    <small className="text-muted">{t('profile.positions', { count: sortedExperiences.length })}</small>
                 </div>
             </div>
 
@@ -252,7 +255,7 @@ function ExperienceSection({ experiences }: { experiences: JapanWorkExperience[]
                 <div className="card border-0 bg-light">
                     <div className="card-body text-center py-4">
                         <FiBriefcase className="text-muted mb-2" style={{ fontSize: 32 }} />
-                        <p className="text-muted mb-0">No Japan work experience provided</p>
+                        <p className="text-muted mb-0">{t('profile.noExperience')}</p>
                     </div>
                 </div>
             ) : (
@@ -274,7 +277,7 @@ function ExperienceSection({ experiences }: { experiences: JapanWorkExperience[]
 // Job Card Component
 // ============================================================================
 
-function JobCard({ job }: { job: Job }) {
+function JobCard({ job, t }: { job: Job; t: TFunction }) {
     return (
         <div className="col-lg-6 col-md-6 col-12 mt-4 pt-2">
             <div className="job-post rounded shadow p-4">
@@ -304,7 +307,7 @@ function JobCard({ job }: { job: Job }) {
                 </div>
                 <div className="mt-3">
                     <Link href={`/candidate/jobs/${job.id}`} className="btn btn-sm btn-primary">
-                        View Details
+                        {t('common.viewDetails')}
                     </Link>
                 </div>
             </div>
@@ -316,7 +319,7 @@ function JobCard({ job }: { job: Job }) {
 // Recommended Jobs Section
 // ============================================================================
 
-function RecommendedJobsSection() {
+function RecommendedJobsSection({ t }: { t: TFunction }) {
     const { data, isLoading, error } = useRecommendedJobs(3);
 
     // Filter only active jobs from active companies
@@ -330,9 +333,9 @@ function RecommendedJobsSection() {
             <div className="row justify-content-center mb-4 pb-2">
                 <div className="col-12">
                     <div className="section-title text-center">
-                        <h4 className="title mb-3">Recommended Jobs</h4>
+                        <h4 className="title mb-3">{t('profile.recommendedJobs')}</h4>
                         <p className="text-muted para-desc mx-auto mb-0">
-                            Explore available job opportunities that match your profile.
+                            {t('profile.recommendedJobsDesc')}
                         </p>
                     </div>
                 </div>
@@ -349,25 +352,25 @@ function RecommendedJobsSection() {
 
                 {error && (
                     <div className="col-12">
-                        <p className="text-muted text-center">Unable to load job recommendations.</p>
+                        <p className="text-muted text-center">{t('profile.unableToLoadJobs')}</p>
                     </div>
                 )}
 
                 {!isLoading && !error && activeJobs.length === 0 && (
                     <div className="col-12">
-                        <p className="text-muted text-center fst-italic">No job recommendations available at the moment.</p>
+                        <p className="text-muted text-center fst-italic">{t('profile.noRecommendations')}</p>
                     </div>
                 )}
 
                 {!isLoading && !error && activeJobs.map((job) => (
-                    <JobCard key={job.id} job={job} />
+                    <JobCard key={job.id} job={job} t={t} />
                 ))}
             </div>
 
             {activeJobs.length > 0 && (
                 <div className="mt-4 text-center">
                     <Link href="/candidate/jobs" className="btn btn-primary">
-                        See All Jobs
+                        {t('profile.seeAllJobs')}
                     </Link>
                 </div>
             )}
@@ -388,6 +391,7 @@ interface SidebarProps {
     japaneseLevel?: string;
     verificationStatus?: VerificationStatus;
     cvUrl?: string;
+    t: TFunction;
 }
 
 function PersonalDetailSidebar({
@@ -399,19 +403,20 @@ function PersonalDetailSidebar({
     japaneseLevel,
     verificationStatus,
     cvUrl,
+    t,
 }: SidebarProps) {
     // Helper to get status badge styling
     const getStatusBadge = (status?: VerificationStatus) => {
         switch (status) {
             case 'VERIFIED':
-                return { bg: 'bg-success', text: 'Verified', icon: FiCheckCircle };
+                return { bg: 'bg-success', text: t('common.verified'), icon: FiCheckCircle };
             case 'SUBMITTED':
-                return { bg: 'bg-info', text: 'Under Review', icon: FiClock };
+                return { bg: 'bg-info', text: t('common.underReview'), icon: FiClock };
             case 'REJECTED':
-                return { bg: 'bg-danger', text: 'Rejected', icon: FiAlertCircle };
+                return { bg: 'bg-danger', text: t('common.rejected'), icon: FiAlertCircle };
             case 'PENDING':
             default:
-                return { bg: 'bg-warning', text: 'Pending', icon: FiAlertCircle };
+                return { bg: 'bg-warning', text: t('common.pending'), icon: FiAlertCircle };
         }
     };
 
@@ -420,12 +425,12 @@ function PersonalDetailSidebar({
 
     return (
         <div className="card bg-light p-4 rounded shadow sticky-bar">
-            <h5 className="mb-0">Personal Detail:</h5>
+            <h5 className="mb-0">{t('profile.personalDetail')}</h5>
             <div className="mt-3">
                 {/* Verification Status */}
                 <div className="d-flex align-items-center justify-content-between mt-3">
                     <span className="d-inline-flex align-items-center text-muted fw-medium">
-                        <FiCheckCircle className="fea icon-sm me-2" /> Status:
+                        <FiCheckCircle className="fea icon-sm me-2" /> {t('profile.status')}
                     </span>
                     <span className={`badge ${statusInfo.bg} d-inline-flex align-items-center`}>
                         <StatusIcon className="me-1" style={{ fontSize: 11 }} />
@@ -436,7 +441,7 @@ function PersonalDetailSidebar({
                 {email && (
                     <div className="d-flex align-items-center justify-content-between mt-3">
                         <span className="d-inline-flex align-items-center text-muted fw-medium">
-                            <FiMail className="fea icon-sm me-2" /> Email:
+                            <FiMail className="fea icon-sm me-2" /> {t('profile.email')}
                         </span>
                         <span className="fw-medium" style={{ fontSize: 13, wordBreak: 'break-all' }}>{email}</span>
                     </div>
@@ -445,7 +450,7 @@ function PersonalDetailSidebar({
                 {phone && (
                     <div className="d-flex align-items-center justify-content-between mt-3">
                         <span className="d-inline-flex align-items-center text-muted fw-medium">
-                            <FiPhone className="fea icon-sm me-2" /> Phone:
+                            <FiPhone className="fea icon-sm me-2" /> {t('profile.phone')}
                         </span>
                         <span className="fw-medium">{phone}</span>
                     </div>
@@ -454,10 +459,10 @@ function PersonalDetailSidebar({
                 {website && (
                     <div className="d-flex align-items-center justify-content-between mt-3">
                         <span className="d-inline-flex align-items-center text-muted fw-medium">
-                            <FiGlobe className="fea icon-sm me-2" /> Website:
+                            <FiGlobe className="fea icon-sm me-2" /> {t('profile.website')}
                         </span>
                         <a href={website} target="_blank" rel="noopener noreferrer" className="fw-medium text-primary">
-                            Visit <FiExternalLink className="ms-1" style={{ fontSize: 12 }} />
+                            {t('profile.visit')} <FiExternalLink className="ms-1" style={{ fontSize: 12 }} />
                         </a>
                     </div>
                 )}
@@ -465,7 +470,7 @@ function PersonalDetailSidebar({
                 {japanExperienceDuration !== undefined && japanExperienceDuration > 0 && (
                     <div className="d-flex align-items-center justify-content-between mt-3">
                         <span className="d-inline-flex align-items-center text-muted fw-medium">
-                            <FiBriefcase className="fea icon-sm me-2" /> Japan Exp:
+                            <FiBriefcase className="fea icon-sm me-2" /> {t('profile.japanExp')}
                         </span>
                         <span className="fw-medium">{formatExperienceDuration(japanExperienceDuration)}</span>
                     </div>
@@ -475,7 +480,7 @@ function PersonalDetailSidebar({
                 {japaneseLevel && (
                     <div className="d-flex align-items-center justify-content-between mt-3">
                         <span className="d-inline-flex align-items-center text-muted fw-medium">
-                            <FiAward className="fea icon-sm me-2" /> Japanese:
+                            <FiAward className="fea icon-sm me-2" /> {t('profile.japanese')}
                         </span>
                         <span className="badge bg-soft-primary text-primary px-3">{japaneseLevel}</span>
                     </div>
@@ -486,7 +491,7 @@ function PersonalDetailSidebar({
                     <div className="p-3 rounded shadow bg-white mt-4">
                         <div className="d-flex align-items-center mb-2">
                             <FiFileText className="fea icon-md text-primary" />
-                            <h6 className="mb-0 ms-2">JLPT Certificate</h6>
+                            <h6 className="mb-0 ms-2">{t('profile.jlptCertificate')}</h6>
                         </div>
                         <a
                             href={japaneseCertificateUrl}
@@ -494,7 +499,7 @@ function PersonalDetailSidebar({
                             rel="noopener noreferrer"
                             className="btn btn-outline-primary btn-sm w-100"
                         >
-                            <FiExternalLink className="fea icon-sm me-1" /> View Certificate
+                            <FiExternalLink className="fea icon-sm me-1" /> {t('profile.viewCertificate')}
                         </a>
                     </div>
                 )}
@@ -504,7 +509,7 @@ function PersonalDetailSidebar({
                     <div className="p-3 rounded shadow bg-white mt-3">
                         <div className="d-flex align-items-center mb-2">
                             <FiFileText className="fea icon-md text-success" />
-                            <h6 className="mb-0 ms-2">CV / Resume</h6>
+                            <h6 className="mb-0 ms-2">{t('profile.cvResume')}</h6>
                         </div>
                         <a
                             href={cvUrl}
@@ -512,7 +517,7 @@ function PersonalDetailSidebar({
                             rel="noopener noreferrer"
                             className="btn btn-primary btn-sm w-100"
                         >
-                            <FiDownload className="fea icon-sm me-1" /> View CV
+                            <FiDownload className="fea icon-sm me-1" /> {t('profile.viewCv')}
                         </a>
                     </div>
                 )}
@@ -526,6 +531,7 @@ function PersonalDetailSidebar({
 // ============================================================================
 
 export default function CandidateProfile() {
+    const { t } = useTranslation('candidate');
     const { data: profileData, isLoading, error } = useCandidateProfile();
 
     // Loading state
@@ -565,7 +571,7 @@ export default function CandidateProfile() {
                 <NavbarDark navClass="defaultscroll sticky" navLight={false} />
                 <section className="section">
                     <div className="container">
-                        <ErrorState message={error.message} />
+                        <ErrorState message={error.message} t={t} />
                     </div>
                 </section>
                 <Footer top={true} />
@@ -581,7 +587,7 @@ export default function CandidateProfile() {
                 <NavbarDark navClass="defaultscroll sticky" navLight={false} />
                 <section className="section">
                     <div className="container">
-                        <ProfileNotFound />
+                        <ProfileNotFound t={t} />
                     </div>
                 </section>
                 <Footer top={true} />
@@ -599,7 +605,7 @@ export default function CandidateProfile() {
                 <NavbarDark navClass="defaultscroll sticky" navLight={false} />
                 <section className="section">
                     <div className="container">
-                        <ProfileNotCompleted />
+                        <ProfileNotCompleted t={t} />
                     </div>
                 </section>
                 <Footer top={true} />
@@ -657,20 +663,20 @@ export default function CandidateProfile() {
 
                 <div className="container mt-4">
                     {/* Status Banner */}
-                    <StatusBanner status={verification.status} />
+                    <StatusBanner status={verification.status} t={t} />
 
                     <div className="row g-4">
                         <div className="col-lg-8 col-md-7 col-12">
                             {/* Introduction Section */}
                             {verification.intro && (
                                 <>
-                                    <h5 className="mb-4">Introduction:</h5>
+                                    <h5 className="mb-4">{t('profile.introduction')}</h5>
                                     <p className="text-muted">{verification.intro}</p>
                                 </>
                             )}
 
                             {/* Japan Work Experience Section */}
-                            <ExperienceSection experiences={experiences || []} />
+                            <ExperienceSection experiences={experiences || []} t={t} />
                         </div>
 
                         <div className="col-lg-4 col-md-5 col-12">
@@ -683,13 +689,14 @@ export default function CandidateProfile() {
                                 japaneseLevel={verification.japanese_level}
                                 verificationStatus={verification.status}
                                 cvUrl={verification.cv_url}
+                                t={t}
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Recommended Jobs Section */}
-                <RecommendedJobsSection />
+                <RecommendedJobsSection t={t} />
             </section>
             <Footer top={true} />
             <ScrollTop />

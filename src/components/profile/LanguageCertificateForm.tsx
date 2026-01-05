@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { CandidateWithFullDetails, CertificateType } from '@/types/candidate';
 import { FiTrash2, FiPlus, FiUpload } from 'react-icons/fi';
 import clsx from 'clsx';
@@ -13,6 +14,7 @@ const CERTIFICATE_TYPES: { value: CertificateType; label: string; maxScore: numb
 ];
 
 export function LanguageCertificateForm() {
+    const { t } = useTranslation('candidate');
     const { register, control, watch, setValue, formState: { errors } } = useFormContext<CandidateWithFullDetails>();
     const { fields, append, remove } = useFieldArray({
         control,
@@ -53,15 +55,15 @@ export function LanguageCertificateForm() {
         <div className="mb-0">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h5 className="mb-1">Language Certificates</h5>
-                    <small className="text-muted">TOEFL, IELTS, TOEIC, etc. (JLPT is in Identity tab)</small>
+                    <h5 className="mb-1">{t('professional.languageCertificates')}</h5>
+                    <small className="text-muted">{t('professional.languageCertificatesHelp')}</small>
                 </div>
                 <button
                     type="button"
                     onClick={addCertificate}
                     className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                 >
-                    <FiPlus /> Add Certificate
+                    <FiPlus /> {t('professional.addCertificate')}
                 </button>
             </div>
 
@@ -78,7 +80,7 @@ export function LanguageCertificateForm() {
                                     type="button"
                                     onClick={() => remove(index)}
                                     className="btn btn-sm text-danger position-absolute top-0 end-0 m-2"
-                                    title="Remove Certificate"
+                                    title={t('professional.remove')}
                                 >
                                     <FiTrash2 size={18} />
                                 </button>
@@ -87,7 +89,7 @@ export function LanguageCertificateForm() {
                                     {/* Certificate Type */}
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label fw-semibold">
-                                            Certificate Type <span className="text-danger">*</span>
+                                            {t('professional.certificateType')} <span className="text-danger">*</span>
                                         </label>
                                         <select
                                             {...register(`certificates.${index}.certificate_type` as const)}
@@ -103,11 +105,11 @@ export function LanguageCertificateForm() {
                                     {certType === 'OTHER' && (
                                         <div className="col-md-6 mb-3">
                                             <label className="form-label fw-semibold">
-                                                Certificate Name <span className="text-danger">*</span>
+                                                {t('professional.certificateName')} <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 {...register(`certificates.${index}.certificate_name` as const, {
-                                                    required: certType === 'OTHER' ? "Name is required" : false
+                                                    required: certType === 'OTHER' ? t('professional.certificateNameRequired') : false
                                                 })}
                                                 className={clsx("form-control", errors.certificates?.[index]?.certificate_name && "is-invalid")}
                                                 placeholder="e.g. Cambridge English"
@@ -122,7 +124,7 @@ export function LanguageCertificateForm() {
                                     {scoreInfo.maxScore > 0 && (
                                         <div className={certType === 'OTHER' ? "col-12 mb-3" : "col-md-6 mb-3"}>
                                             <label className="form-label fw-semibold">
-                                                Score <small className="text-muted">(0-{scoreInfo.maxScore})</small>
+                                                {t('professional.score')} <small className="text-muted">(0-{scoreInfo.maxScore})</small>
                                             </label>
                                             <input
                                                 type="number"
@@ -143,7 +145,7 @@ export function LanguageCertificateForm() {
 
                                     {/* Issued Date */}
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label fw-semibold">Issued Date</label>
+                                        <label className="form-label fw-semibold">{t('professional.issueDate')}</label>
                                         <input
                                             type="date"
                                             {...register(`certificates.${index}.issued_date` as const)}
@@ -153,34 +155,34 @@ export function LanguageCertificateForm() {
 
                                     {/* Expires Date */}
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label fw-semibold">Expires Date</label>
+                                        <label className="form-label fw-semibold">{t('professional.expiryDate')}</label>
                                         <input
                                             type="date"
                                             {...register(`certificates.${index}.expires_date` as const)}
                                             className="form-control"
                                         />
-                                        <div className="form-text">Leave empty if no expiration</div>
+                                        <div className="form-text">{t('professional.noExpiry')}</div>
                                     </div>
 
                                     {/* Document Upload */}
                                     <div className="col-12 mb-3">
                                         <label className="form-label fw-semibold">
-                                            Certificate Document <span className="text-danger">*</span>
+                                            {t('professional.certificateDocument')} <span className="text-danger">*</span>
                                         </label>
                                         <input
                                             type="hidden"
                                             {...register(`certificates.${index}.document_file_path` as const, {
-                                                required: "Document is required"
+                                                required: t('professional.documentRequired')
                                             })}
                                         />
 
                                         {docPath ? (
                                             <div className="d-flex align-items-center gap-2">
                                                 <a href={docPath} target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">
-                                                    View Document
+                                                    {t('professional.viewDocument')}
                                                 </a>
                                                 <label className="btn btn-outline-primary btn-sm mb-0">
-                                                    {uploading === index ? 'Uploading...' : 'Replace'}
+                                                    {uploading === index ? t('professional.uploading') : t('professional.replace')}
                                                     <input
                                                         type="file"
                                                         className="d-none"
@@ -199,7 +201,7 @@ export function LanguageCertificateForm() {
                                                 errors.certificates?.[index]?.document_file_path && "border-danger text-danger"
                                             )}>
                                                 <FiUpload />
-                                                {uploading === index ? 'Uploading...' : 'Upload Certificate (PDF/DOC/Image)'}
+                                                {uploading === index ? t('professional.uploading') : t('professional.uploadCertificate')}
                                                 <input
                                                     type="file"
                                                     className="d-none"
@@ -226,7 +228,7 @@ export function LanguageCertificateForm() {
 
                 {fields.length === 0 && (
                     <div className="text-center py-5 border rounded bg-light text-muted">
-                        No language certificates added yet.
+                        {t('professional.noCertificates')}
                     </div>
                 )}
             </div>

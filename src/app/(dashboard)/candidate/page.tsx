@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 import NavbarDark from "../../components/navbarCandidate";
 import Footer from "../../components/footer";
@@ -33,16 +34,16 @@ function formatDate(dateString: string): string {
     });
 }
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(dateString: string, t: (key: string, options?: Record<string, unknown>) => string): string {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays === 0) return t('common.today');
+    if (diffDays === 1) return t('common.yesterday');
+    if (diffDays < 7) return t('common.daysAgo', { count: diffDays });
+    if (diffDays < 30) return t('common.weeksAgo', { count: Math.floor(diffDays / 7) });
     return formatDate(dateString);
 }
 
@@ -73,7 +74,7 @@ function calculateProfileCompletion(v: CandidateVerification | undefined): { per
 }
 
 // Job Card Component
-function JobCard({ job }: { job: JobWithCompany }) {
+function JobCard({ job, t }: { job: JobWithCompany; t: (key: string, options?: Record<string, unknown>) => string }) {
     return (
         <div className="col-lg-6 col-12 mt-4 pt-2">
             <div className="card shadow-sm border-0 h-100">
@@ -115,12 +116,12 @@ function JobCard({ job }: { job: JobWithCompany }) {
                             <FiDollarSign className="me-1" style={{ width: 14 }} /> {formatSalary(job.salary_min, job.salary_max)}
                         </span>
                         <span className="text-muted small d-block mt-1">
-                            <FiClock className="me-1" style={{ width: 14 }} /> Posted {formatDate(job.created_at)}
+                            <FiClock className="me-1" style={{ width: 14 }} /> {t('index.posted', { date: formatDate(job.created_at) })}
                         </span>
                     </div>
                     <div className="mt-3 pt-3 border-top">
-                        <Link href={`/candidate/jobs/${job.id}`} className="btn btn-sm btn-primary me-2">View Details</Link>
-                        <Link href={`/candidate/jobs/${job.id}/apply`} className="btn btn-sm btn-outline-primary">Apply Now</Link>
+                        <Link href={`/candidate/jobs/${job.id}`} className="btn btn-sm btn-primary me-2">{t('common.viewDetails')}</Link>
+                        <Link href={`/candidate/jobs/${job.id}/apply`} className="btn btn-sm btn-outline-primary">{t('common.applyNow')}</Link>
                     </div>
                 </div>
             </div>
@@ -129,6 +130,7 @@ function JobCard({ job }: { job: JobWithCompany }) {
 }
 
 export default function CandidateDashboard() {
+    const { t } = useTranslation('candidate');
     const { data: jobsData, isLoading: isLoadingJobs, error: jobsError } = useJobs(1, 4);
     const { data: profileData, isLoading: isLoadingProfile } = useCandidateProfile();
     const { data: applications, isLoading: isLoadingApplications } = useMyApplications();
@@ -165,15 +167,15 @@ export default function CandidateDashboard() {
                     <div className="row mt-5 justify-content-center">
                         <div className="col-12">
                             <div className="title-heading text-center">
-                                <h5 className="heading fw-semibold mb-0 sub-heading text-white title-dark">WELCOME TO <br /> J EXPERT RECRUITMENT <br /> CANDIDATE DASHBOARD</h5>
+                                <h5 className="heading fw-semibold mb-0 sub-heading text-white title-dark" style={{ whiteSpace: 'pre-line' }}>{t('index.heroTitle')}</h5>
                             </div>
                         </div>
                     </div>
                     <div className="position-middle-bottom">
                         <nav aria-label="breadcrumb" className="d-block">
                             <ul className="breadcrumb breadcrumb-muted mb-0 p-0">
-                                <li className="breadcrumb-item"><Link href="/">HOME</Link></li>
-                                <li className="breadcrumb-item active" aria-current="page">Dashboard</li>
+                                <li className="breadcrumb-item"><Link href="/">{t('index.breadcrumbHome')}</Link></li>
+                                <li className="breadcrumb-item active" aria-current="page">{t('index.breadcrumbDashboard')}</li>
                             </ul>
                         </nav>
                     </div>
@@ -191,18 +193,18 @@ export default function CandidateDashboard() {
                                 <div className="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
                                     <i className="mdi mdi-alert-circle-outline text-danger me-3 fs-4"></i>
                                     <div className="flex-grow-1">
-                                        <strong>Profile Incomplete</strong>
+                                        <strong>{t('index.profileIncomplete')}</strong>
                                         <p className="mb-0 small">
-                                            Your profile is {percentage}% complete. Complete all mandatory fields to become verified and apply for jobs.
+                                            {t('index.profileIncompleteDesc', { percentage })}
                                             {missing.length > 0 && (
                                                 <span className="d-block text-muted">
-                                                    Missing: {missing.slice(0, 3).join(', ')}{missing.length > 3 && ` +${missing.length - 3} more`}
+                                                    {t('index.missing')}: {missing.slice(0, 3).join(', ')}{missing.length > 3 && ` ${t('index.more', { count: missing.length - 3 })}`}
                                                 </span>
                                             )}
                                         </p>
                                     </div>
                                     <Link href="/candidate/settings" className="btn btn-danger btn-sm ms-3">
-                                        <i className="mdi mdi-pencil me-1"></i> Complete Profile
+                                        <i className="mdi mdi-pencil me-1"></i> {t('common.completeProfile')}
                                     </Link>
                                 </div>
                             </div>
@@ -245,7 +247,7 @@ export default function CandidateDashboard() {
                                                 ) : (
                                                     verification?.first_name && verification?.last_name
                                                         ? `${verification.first_name} ${verification.last_name}`
-                                                        : 'Complete Your Profile'
+                                                        : t('common.completeProfile')
                                                 )}
                                             </h5>
                                             {verification?.occupation && (
@@ -254,19 +256,19 @@ export default function CandidateDashboard() {
                                             {/* Verification Badge */}
                                             {verification?.status === 'VERIFIED' ? (
                                                 <span className="badge bg-success-subtle text-success">
-                                                    <i className="mdi mdi-check-circle me-1"></i> Verified
+                                                    <i className="mdi mdi-check-circle me-1"></i> {t('common.verified')}
                                                 </span>
                                             ) : verification?.status === 'SUBMITTED' ? (
                                                 <span className="badge bg-warning-subtle text-warning">
-                                                    <i className="mdi mdi-clock-outline me-1"></i> Under Review
+                                                    <i className="mdi mdi-clock-outline me-1"></i> {t('common.underReview')}
                                                 </span>
                                             ) : verification?.status === 'REJECTED' ? (
                                                 <span className="badge bg-danger-subtle text-danger">
-                                                    <i className="mdi mdi-close-circle me-1"></i> Rejected
+                                                    <i className="mdi mdi-close-circle me-1"></i> {t('common.rejected')}
                                                 </span>
                                             ) : (
                                                 <span className="badge bg-secondary-subtle text-secondary">
-                                                    <i className="mdi mdi-alert-circle-outline me-1"></i> Not Verified
+                                                    <i className="mdi mdi-alert-circle-outline me-1"></i> {t('common.notVerified')}
                                                 </span>
                                             )}
                                         </div>
@@ -274,7 +276,7 @@ export default function CandidateDashboard() {
                                         {/* Progress Bar */}
                                         <div className="col-lg-4 col-md-3 mt-3 mt-md-0">
                                             <div className="d-flex justify-content-between align-items-center mb-1">
-                                                <small className="text-muted">Profile Completion</small>
+                                                <small className="text-muted">{t('index.profileCompletion')}</small>
                                                 <small className={`fw-bold ${percentage === 100 ? 'text-success' : percentage >= 70 ? 'text-warning' : 'text-danger'}`}>
                                                     {percentage}%
                                                 </small>
@@ -288,7 +290,7 @@ export default function CandidateDashboard() {
                                             </div>
                                             {percentage < 100 && missing.length > 0 && (
                                                 <small className="text-muted d-block mt-1">
-                                                    Missing: {missing.slice(0, 2).join(', ')}{missing.length > 2 && ` +${missing.length - 2}`}
+                                                    {t('index.missing')}: {missing.slice(0, 2).join(', ')}{missing.length > 2 && ` ${t('index.more', { count: missing.length - 2 })}`}
                                                 </small>
                                             )}
                                         </div>
@@ -296,7 +298,7 @@ export default function CandidateDashboard() {
                                         {/* Actions */}
                                         <div className="col-lg-2 col-md-2 text-md-end mt-3 mt-lg-0">
                                             <Link href="/candidate/settings" className="btn btn-primary btn-sm">
-                                                <i className="mdi mdi-pencil me-1"></i> Edit
+                                                <i className="mdi mdi-pencil me-1"></i> {t('common.edit')}
                                             </Link>
                                         </div>
                                     </div>
@@ -319,7 +321,7 @@ export default function CandidateDashboard() {
                                             </div>
                                             <div>
                                                 <h6 className="text-muted text-uppercase fw-bold mb-1" style={{ fontSize: '0.7rem' }}>
-                                                    Available Jobs
+                                                    {t('index.availableJobs')}
                                                 </h6>
                                                 <h4 className="mb-0 fw-bold">{totalJobs}</h4>
                                             </div>
@@ -341,7 +343,7 @@ export default function CandidateDashboard() {
                                             </div>
                                             <div>
                                                 <h6 className="text-muted text-uppercase fw-bold mb-1" style={{ fontSize: '0.7rem' }}>
-                                                    Applications
+                                                    {t('index.applications')}
                                                 </h6>
                                                 <h4 className="mb-0 fw-bold">{applicationStats.total}</h4>
                                             </div>
@@ -363,7 +365,7 @@ export default function CandidateDashboard() {
                                             </div>
                                             <div>
                                                 <h6 className="text-muted text-uppercase fw-bold mb-1" style={{ fontSize: '0.7rem' }}>
-                                                    Accepted
+                                                    {t('index.accepted')}
                                                 </h6>
                                                 <h4 className="mb-0 fw-bold text-success">{applicationStats.accepted}</h4>
                                             </div>
@@ -385,13 +387,13 @@ export default function CandidateDashboard() {
                                             </div>
                                             <div>
                                                 <h6 className="text-muted text-uppercase fw-bold mb-1" style={{ fontSize: '0.7rem' }}>
-                                                    CV Status
+                                                    {t('index.cvStatus')}
                                                 </h6>
                                                 <p className="mb-0 small fw-semibold">
-                                                    {verification?.cv_url ? 'Uploaded' : 'Not Uploaded'}
+                                                    {verification?.cv_url ? t('common.uploaded') : t('common.notUploaded')}
                                                 </p>
                                                 {verification?.updated_at && (
-                                                    <small className="text-muted">{formatRelativeTime(verification.updated_at)}</small>
+                                                    <small className="text-muted">{formatRelativeTime(verification.updated_at, t)}</small>
                                                 )}
                                             </div>
                                         </div>
@@ -408,8 +410,8 @@ export default function CandidateDashboard() {
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h6 className="mb-0 fw-semibold">Your Submitted Applications</h6>
-                                            <small className="text-muted">{applications.length} TOTAL APPLICATIONS</small>
+                                            <h6 className="mb-0 fw-semibold">{t('index.yourApplications')}</h6>
+                                            <small className="text-muted">{t('index.totalApplications', { count: applications.length })}</small>
                                         </div>
                                     </div>
                                     <div className="card-body p-0">
@@ -424,7 +426,7 @@ export default function CandidateDashboard() {
                                                     <div className="row align-items-center">
                                                         {/* Job Title */}
                                                         <div className="col-lg-4 col-md-4 mb-3 mb-md-0">
-                                                            <h6 className="mb-0 fw-semibold">{app.job_title || 'Job Application'}</h6>
+                                                            <h6 className="mb-0 fw-semibold">{app.job_title || t('index.jobApplication')}</h6>
                                                         </div>
 
                                                         {/* Progress Tracker */}
@@ -453,7 +455,7 @@ export default function CandidateDashboard() {
                                                                     >
                                                                         <i className="mdi mdi-check text-white" style={{ fontSize: 14 }}></i>
                                                                     </div>
-                                                                    <small className="text-muted d-block mt-1" style={{ fontSize: '0.7rem' }}>Applied</small>
+                                                                    <small className="text-muted d-block mt-1" style={{ fontSize: '0.7rem' }}>{t('index.applied')}</small>
                                                                 </div>
 
                                                                 {/* Reviewed */}
@@ -471,7 +473,7 @@ export default function CandidateDashboard() {
                                                                             <i className="mdi mdi-close text-white" style={{ fontSize: 14 }}></i>
                                                                         )}
                                                                     </div>
-                                                                    <small className="text-muted d-block mt-1" style={{ fontSize: '0.7rem' }}>Review</small>
+                                                                    <small className="text-muted d-block mt-1" style={{ fontSize: '0.7rem' }}>{t('index.review')}</small>
                                                                 </div>
 
                                                                 {/* Accepted */}
@@ -490,7 +492,7 @@ export default function CandidateDashboard() {
                                                                         )}
                                                                     </div>
                                                                     <small className={`d-block mt-1 ${isRejected ? 'text-danger' : 'text-muted'}`} style={{ fontSize: '0.7rem' }}>
-                                                                        {isRejected ? 'Rejected' : 'Accepted'}
+                                                                        {isRejected ? t('common.rejected') : t('index.accepted')}
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -508,9 +510,9 @@ export default function CandidateDashboard() {
                     {/* Recent Jobs */}
                     <div className="card shadow-sm border-0">
                         <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                            <h6 className="mb-0 fw-semibold">Recent Jobs</h6>
+                            <h6 className="mb-0 fw-semibold">{t('index.recentJobs')}</h6>
                             <Link href="/candidate/jobs" className="btn btn-sm btn-outline-primary">
-                                View All
+                                {t('common.viewAll')}
                             </Link>
                         </div>
                         <div className="card-body">
@@ -529,8 +531,8 @@ export default function CandidateDashboard() {
                             {jobsError && (
                                 <div className="text-center py-5">
                                     <i className="mdi mdi-alert-circle-outline text-danger" style={{ fontSize: 48 }}></i>
-                                    <h6 className="mt-3">Failed to load jobs</h6>
-                                    <p className="text-muted small">Please try again later.</p>
+                                    <h6 className="mt-3">{t('index.failedToLoadJobs')}</h6>
+                                    <p className="text-muted small">{t('index.tryAgainLater')}</p>
                                 </div>
                             )}
 
@@ -538,8 +540,8 @@ export default function CandidateDashboard() {
                             {!isLoadingJobs && !jobsError && recentJobs.length === 0 && (
                                 <div className="text-center py-5">
                                     <i className="mdi mdi-briefcase-remove-outline text-muted" style={{ fontSize: 48 }}></i>
-                                    <h6 className="mt-3 text-dark">No jobs available</h6>
-                                    <p className="text-muted small">Check back later for new opportunities!</p>
+                                    <h6 className="mt-3 text-dark">{t('index.noJobsAvailable')}</h6>
+                                    <p className="text-muted small">{t('index.checkBackLater')}</p>
                                 </div>
                             )}
 
@@ -547,7 +549,7 @@ export default function CandidateDashboard() {
                             {!isLoadingJobs && !jobsError && recentJobs.length > 0 && (
                                 <div className="row">
                                     {recentJobs.map((job) => (
-                                        <JobCard key={job.id} job={job} />
+                                        <JobCard key={job.id} job={job} t={t} />
                                     ))}
                                 </div>
                             )}

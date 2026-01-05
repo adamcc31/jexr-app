@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useCandidateProfile } from '@/hooks/useCandidateProfile';
 import { CandidateWithFullDetails } from '@/types/candidate';
 import { EducationForm } from './EducationForm';
@@ -13,6 +14,7 @@ import { FiLoader } from 'react-icons/fi';
 import clsx from 'clsx';
 
 export function ProfessionalProfile() {
+    const { t } = useTranslation('candidate');
     const { profile, masterSkills, loading, saving, saveProfile } = useCandidateProfile();
 
     const methods = useForm<CandidateWithFullDetails>({
@@ -77,39 +79,39 @@ export function ProfessionalProfile() {
 
                 {/* Professional Summary Section */}
                 <div className="rounded shadow p-4 bg-white mb-4">
-                    <h5 className="mb-4">Professional Summary</h5>
+                    <h5 className="mb-4">{t('professional.professionalSummary')}</h5>
                     <div className="row">
                         <div className="col-12 mb-3">
-                            <label className="form-label fw-semibold">Professional Title <span className="text-danger">*</span></label>
+                            <label className="form-label fw-semibold">{t('professional.professionalTitle')} <span className="text-danger">*</span></label>
                             <input
-                                {...register('profile.title', { required: "Professional Title is required", minLength: { value: 3, message: "Minimum 3 characters" } })}
+                                {...register('profile.title', { required: t('professional.professionalTitleRequired'), minLength: { value: 3, message: t('professional.minCharacters', { count: 3 }) } })}
                                 className={clsx("form-control", errors.profile?.title && "is-invalid")}
-                                placeholder="e.g. Senior Mechanical Engineer"
+                                placeholder={t('professional.professionalTitlePlaceholder')}
                             />
                             {errors.profile?.title && <div className="invalid-feedback">{errors.profile.title.message}</div>}
                         </div>
 
                         <div className="col-12 mb-3">
-                            <label className="form-label fw-semibold">Professional Bio <span className="text-danger">*</span></label>
+                            <label className="form-label fw-semibold">{t('professional.professionalBio')} <span className="text-danger">*</span></label>
                             <textarea
-                                {...register('profile.bio', { required: "Professional Bio is required", minLength: { value: 10, message: "Please provide at least 10 characters" } })}
+                                {...register('profile.bio', { required: t('professional.professionalBioRequired'), minLength: { value: 10, message: t('professional.minCharactersMessage', { count: 10 }) } })}
                                 rows={3}
                                 className={clsx("form-control", errors.profile?.bio && "is-invalid")}
-                                placeholder="Brief summary of your professional background..."
+                                placeholder={t('professional.professionalBioPlaceholder')}
                             />
                             {errors.profile?.bio && <div className="invalid-feedback">{errors.profile.bio.message}</div>}
                         </div>
 
                         <div className="col-12 mb-3">
-                            <label className="form-label fw-semibold">Additional Portfolio Links <span className="text-muted small">(Optional)</span></label>
+                            <label className="form-label fw-semibold">{t('professional.additionalPortfolio')} <span className="text-muted small">({t('settings.optional')})</span></label>
                             <input
                                 {...register('profile.resume_url')}
                                 className="form-control"
-                                placeholder="https://linkedin.com/in/... or https://github.com/..."
+                                placeholder={t('professional.additionalPortfolioPlaceholder')}
                             />
                             <div className="form-text text-muted">
-                                Additional online portfolio links (LinkedIn, GitHub, etc).
-                                <strong> Note:</strong> Your CV document is uploaded in the Identity &amp; Verification tab.
+                                {t('professional.portfolioHelp')}
+                                <strong> {t('professional.portfolioNote')}</strong>
                             </div>
                         </div>
                     </div>
@@ -152,10 +154,11 @@ export function ProfessionalProfile() {
                         style={{ backgroundColor: '#0f172a', borderColor: '#0f172a' }}
                     >
                         {saving && <FiLoader className="animate-spin me-2" size={16} />}
-                        Save Professional Profile
+                        {t('professional.saveProfile')}
                     </button>
                 </div>
             </form>
         </FormProvider>
     );
 }
+

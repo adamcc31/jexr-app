@@ -1,27 +1,29 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { CandidateWithFullDetails } from '@/types/candidate';
 import clsx from 'clsx';
 
 export function SoftSkillForm() {
+    const { t } = useTranslation('candidate');
     const { register, formState: { errors } } = useFormContext<CandidateWithFullDetails>();
 
     return (
         <div className="mb-0">
-            <h5 className="mb-4">Personal Details & Soft Skills</h5>
+            <h5 className="mb-4">{t('professional.softSkills')}</h5>
 
             <div className="row">
                 <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold">Soft Skills Description <span className="text-danger">*</span></label>
-                    <div className="form-text mb-1">Describe your personal strengths (e.g., leadership, communication, adaptability).</div>
+                    <label className="form-label fw-semibold">{t('professional.softSkillsDescription')} <span className="text-danger">*</span></label>
+                    <div className="form-text mb-1">{t('professional.softSkillsDescHelp')}</div>
                     <textarea
                         {...register('details.soft_skills_description', {
-                            required: "Soft skills description is required",
-                            minLength: { value: 20, message: "Please provide a more detailed description (min 20 chars)" }
+                            required: t('professional.softSkillsRequired'),
+                            minLength: { value: 20, message: t('professional.minCharactersMessage', { count: 20 }) }
                         })}
                         rows={4}
                         className={clsx("form-control", errors.details?.soft_skills_description && "is-invalid")}
-                        placeholder="I am a quick learner and work well in teams..."
+                        placeholder={t('professional.softSkillsPlaceholder')}
                     />
                     {errors.details?.soft_skills_description && (
                         <div className="invalid-feedback">{errors.details.soft_skills_description.message}</div>
@@ -29,13 +31,13 @@ export function SoftSkillForm() {
                 </div>
 
                 <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold">Work Values Applied <span className="text-danger">*</span></label>
-                    <div className="form-text mb-1">What values do you apply in your work? (e.g., discipline, kaizen, punctuality).</div>
+                    <label className="form-label fw-semibold">{t('professional.appliedWorkValues')} <span className="text-danger">*</span></label>
+                    <div className="form-text mb-1">{t('professional.appliedWorkValuesHelp')}</div>
                     <textarea
-                        {...register('details.applied_work_values', { required: "Work values are required" })}
+                        {...register('details.applied_work_values', { required: t('professional.appliedWorkValuesRequired') })}
                         rows={4}
                         className={clsx("form-control", errors.details?.applied_work_values && "is-invalid")}
-                        placeholder="I value punctuality and continuous improvement..."
+                        placeholder={t('professional.appliedWorkValuesPlaceholder')}
                     />
                     {errors.details?.applied_work_values && (
                         <div className="invalid-feedback">{errors.details.applied_work_values.message}</div>
@@ -43,13 +45,13 @@ export function SoftSkillForm() {
                 </div>
 
                 <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold">Major Achievements <span className="text-danger">*</span></label>
-                    <div className="form-text mb-1">Highlight your key accomplishments in previous roles.</div>
+                    <label className="form-label fw-semibold">{t('professional.majorAchievements')} <span className="text-danger">*</span></label>
+                    <div className="form-text mb-1">{t('professional.majorAchievementsHelp')}</div>
                     <textarea
-                        {...register('details.major_achievements', { required: "Major achievements are required" })}
+                        {...register('details.major_achievements', { required: t('professional.majorAchievementsRequired') })}
                         rows={4}
                         className={clsx("form-control", errors.details?.major_achievements && "is-invalid")}
-                        placeholder="Successfully reduced downtime by 20% in previous role..."
+                        placeholder={t('professional.majorAchievementsPlaceholder')}
                     />
                     {errors.details?.major_achievements && (
                         <div className="invalid-feedback">{errors.details.major_achievements.message}</div>
@@ -59,3 +61,4 @@ export function SoftSkillForm() {
         </div>
     );
 }
+

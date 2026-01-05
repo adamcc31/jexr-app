@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import I18nProvider from '@/components/I18nProvider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     // Create a client - useState ensures it's stable across rerenders
@@ -22,8 +23,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            {children}
+            <I18nProvider>
+                {children}
+            </I18nProvider>
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 }
+

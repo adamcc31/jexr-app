@@ -4,21 +4,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from 'next/navigation'
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiClient } from "@/lib/api";
 
-import { LuSearch, FiUser, FiSettings, FiLock, FiLogOut } from "../assets/icons/vander";
+import { FiUser, FiSettings, FiLogOut, FiGlobe } from "../assets/icons/vander";
 
 export default function Navbar({ navClass, navLight }) {
+    const { t, i18n } = useTranslation('candidate');
     let [isOpen, setMenu] = useState(false);
     let [scroll, setScroll] = useState(false);
-    let [search, setSearch] = useState(false);
     let [cartitem, setCartitem] = useState(false);
+    let [langMenu, setLangMenu] = useState(false);
 
     let [manu, setManu] = useState('');
     let pathname = usePathname();
 
-    const searchRef = React.useRef(null);
     const profileRef = React.useRef(null);
+    const langRef = React.useRef(null);
 
     // Fetch candidate profile for profile picture
     const { data: profileData } = useQuery({
@@ -36,6 +38,11 @@ export default function Navbar({ navClass, navLight }) {
 
     const profilePicUrl = profileData?.verification?.profile_picture_url || "/images/team/01.jpg";
 
+    const changeLanguage = (lng) => {
+        i18n.changeLanguage(lng);
+        setLangMenu(false);
+    };
+
     useEffect(() => {
         setManu(pathname)
         function scrollHandler() {
@@ -48,11 +55,11 @@ export default function Navbar({ navClass, navLight }) {
 
         // Close dropdowns when clicking outside
         function handleClickOutside(event) {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setSearch(false);
-            }
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setCartitem(false);
+            }
+            if (langRef.current && !langRef.current.contains(event.target)) {
+                setLangMenu(false);
             }
         }
 
@@ -89,25 +96,31 @@ export default function Navbar({ navClass, navLight }) {
                 </div>
 
                 <ul className="buy-button list-inline mb-0">
+                    {/* Language Switcher */}
                     <li className="list-inline-item ps-1 mb-0">
-                        <div className="dropdown" ref={searchRef}>
-                            <button type="button" onClick={() => setSearch(!search)} className="dropdown-toggle btn btn-sm btn-icon btn-pills btn-primary">
-                                <LuSearch className="icons" />
+                        <div className="dropdown" ref={langRef}>
+                            <button type="button" onClick={() => setLangMenu(!langMenu)} className="dropdown-toggle btn btn-sm btn-icon btn-pills btn-soft-primary" title={t('common.language')}>
+                                <FiGlobe className="icons" />
                             </button>
-                            <div style={{ display: search === true ? 'block' : 'none' }}>
-                                <div className={`dropdown-menu dd-menu dropdown-menu-end bg-white rounded border-0 mt-3 p-0 show`} style={{ width: '240px', position: 'absolute', right: '0' }}>
-                                    <div className="search-bar">
-                                        <div id="itemSearch" className="menu-search mb-0">
-                                            <form role="search" method="get" id="searchItemform" className="searchform">
-                                                <input type="text" className="form-control rounded border" name="s" id="searchItem" placeholder="Search..." />
-                                                <input type="submit" id="searchItemsubmit" value="Search" />
-                                            </form>
-                                        </div>
-                                    </div>
+                            <div style={{ display: langMenu ? 'block' : 'none' }}>
+                                <div className={`dropdown-menu dd-menu dropdown-menu-end bg-white rounded border-0 mt-3 p-0 show`} style={{ width: '120px', position: 'absolute', right: '0' }}>
+                                    <button
+                                        onClick={() => changeLanguage('en')}
+                                        className={`dropdown-item fw-medium fs-6 ${i18n.language === 'en' ? 'active bg-primary text-white' : ''}`}
+                                    >
+                                        English
+                                    </button>
+                                    <button
+                                        onClick={() => changeLanguage('id')}
+                                        className={`dropdown-item fw-medium fs-6 ${i18n.language === 'id' ? 'active bg-primary text-white' : ''}`}
+                                    >
+                                        Indonesia
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </li>
+
 
                     <li className="list-inline-item ps-1 mb-0">
                         <div className="dropdown dropdown-primary" ref={profileRef}>
@@ -120,10 +133,10 @@ export default function Navbar({ navClass, navLight }) {
                             </button>
                             <div style={{ display: cartitem === true ? 'block' : 'none' }}>
                                 <div className={` dropdown-menu dd-menu dropdown-menu-end bg-white rounded shadow border-0 mt-3 show`}>
-                                    <Link href="/candidate/profile" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiUser className="fea icon-sm me-2 align-middle" />Profile</Link>
-                                    <Link href="/candidate/settings" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiSettings className="fea icon-sm me-2 align-middle" />Settings</Link>
+                                    <Link href="/candidate/profile" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiUser className="fea icon-sm me-2 align-middle" />{t('common.profile')}</Link>
+                                    <Link href="/candidate/settings" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiSettings className="fea icon-sm me-2 align-middle" />{t('common.settings')}</Link>
                                     <div className="dropdown-divider border-top"></div>
-                                    <Link href="/auth/logout" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiLogOut className="fea icon-sm me-2 align-middle" />Logout</Link>
+                                    <Link href="/auth/logout" className="dropdown-item fw-medium fs-6" onClick={() => setCartitem(false)}><FiLogOut className="fea icon-sm me-2 align-middle" />{t('common.logout')}</Link>
                                 </div>
                             </div>
                         </div>
@@ -133,14 +146,14 @@ export default function Navbar({ navClass, navLight }) {
                 <div id="navigation" className={isOpen ? 'open' : ''}>
                     <ul className="navigation-menu nav-right">
                         <li className={manu === "/candidate" ? "active" : ""}>
-                            <Link href="/candidate">Home</Link>
+                            <Link href="/candidate">{t('common.home')}</Link>
                         </li>
 
                         <li className={manu === "/candidate/jobs" ? "active" : ""}>
-                            <Link href="/candidate/jobs">Jobs</Link>
+                            <Link href="/candidate/jobs">{t('common.jobs')}</Link>
                         </li>
 
-                        <li className={manu === "/contactus" ? "active" : ""}><Link href="/contactus" className="sub-menu-item">Contact Us</Link></li>
+                        <li className={manu === "/contactus" ? "active" : ""}><Link href="/contactus" className="sub-menu-item">{t('common.contactUs')}</Link></li>
                     </ul>
                 </div>
             </div>

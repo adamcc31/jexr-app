@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import "react-image-crop/dist/ReactCrop.css";
+import { useTranslation } from "react-i18next";
 
 import Navbar from "../../../components/navbarCandidate";
 import clsx from "clsx";
@@ -193,6 +194,7 @@ const compressImage = async (file: File, maxSizeKB: number = 1024): Promise<Blob
 };
 
 export default function CandidateProfileSetting() {
+    const { t } = useTranslation('candidate');
     const queryClient = useQueryClient();
     const [uploading, setUploading] = useState(false);
     const [activeTab, setActiveTab] = useState<'identity' | 'professional'>('identity');
@@ -214,23 +216,23 @@ export default function CandidateProfileSetting() {
 
     // Helper: Format onboarding interests for display
     const getInterestLabels = (keys: string[] | undefined) => {
-        if (!keys || keys.length === 0) return 'Not specified';
+        if (!keys || keys.length === 0) return t('settings.notSpecified');
         return keys.map(k => INTEREST_OPTIONS.find(o => o.key === k)?.label || k).join(', ');
     };
 
     // Helper: Format company preferences for display
     const getCompanyPrefLabels = (keys: string[] | undefined) => {
-        if (!keys || keys.length === 0) return 'Not specified';
+        if (!keys || keys.length === 0) return t('settings.notSpecified');
         return keys.map(k => COMPANY_PREFERENCE_OPTIONS.find(o => o.key === k)?.label || k).join(', ');
     };
 
     // Helper: Get LPK display name
     const getLPKDisplayName = (data: OnboardingData | undefined) => {
-        if (!data) return 'Not specified';
-        if (data.lpk_selection?.none) return 'No LPK training';
+        if (!data) return t('settings.notSpecified');
+        if (data.lpk_selection?.none) return t('settings.noLpkTraining');
         if (data.lpk_name) return data.lpk_name;
         if (data.lpk_selection?.other_name) return data.lpk_selection.other_name;
-        return 'Not specified';
+        return t('settings.notSpecified');
     };
 
     // 2. Identity Form
@@ -327,11 +329,11 @@ export default function CandidateProfileSetting() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["candidateVerification"] });
-            Swal.fire({ icon: 'success', title: 'Saved!', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: t('settings.saved'), timer: 1500, showConfirmButton: false });
         },
         onError: (err) => {
             console.error(err);
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save changes.' });
+            Swal.fire({ icon: 'error', title: t('settings.error'), text: t('settings.failedToSave') });
         }
     });
 
@@ -372,7 +374,7 @@ export default function CandidateProfileSetting() {
     const watchedCvUrl = watch("cv_url");
     const watchedMaritalStatus = watch("marital_status");
 
-    if (isLoading) return <div className="text-center p-10">Loading...</div>;
+    if (isLoading) return <div className="text-center p-10">{t('common.loading')}</div>;
 
     return (
         <>
@@ -388,22 +390,22 @@ export default function CandidateProfileSetting() {
                                     className={clsx("nav-link", activeTab === 'identity' && "active")}
                                     type="button"
                                 >
-                                    Identity & Verification
+                                    {t('settings.identityTab')}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('professional')}
                                     className={clsx("nav-link", activeTab === 'professional' && "active")}
                                     type="button"
                                 >
-                                    Professional Profile (CV)
+                                    {t('settings.professionalTab')}
                                 </button>
                             </div>
 
                             {activeTab === 'identity' ? (
                                 <div className="rounded shadow p-4 bg-white">
-                                    <h5 className="mb-4">Identity Verification</h5>
+                                    <h5 className="mb-4">{t('settings.identityVerification')}</h5>
                                     {profileData?.verification?.status === 'SUBMITTED' && (
-                                        <div className="alert alert-success">Profile Submitted for Verification</div>
+                                        <div className="alert alert-success">{t('settings.profileSubmitted')}</div>
                                     )}
 
                                     <form onSubmit={handleSubmit((data) => updateMutation.mutate(data))}>
@@ -411,59 +413,59 @@ export default function CandidateProfileSetting() {
                                         <div className="row mb-4">
                                             <div className="col-12 text-center">
                                                 <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#f0f0f0', margin: '0 auto', overflow: 'hidden' }}>
-                                                    {watchedProfilePic ? <img src={watchedProfilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div className="d-flex align-items-center justify-content-center h-100 text-muted">No Image</div>}
+                                                    {watchedProfilePic ? <img src={watchedProfilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div className="d-flex align-items-center justify-content-center h-100 text-muted">{t('settings.noImage')}</div>}
                                                 </div>
                                                 <label className="btn btn-sm btn-primary mt-2">
-                                                    {uploading ? "..." : "Change Picture"}
+                                                    {uploading ? "..." : t('settings.changePicture')}
                                                     <input type="file" className="d-none" accept="image/*" onChange={(e) => handleFileUpload(e, "profile_picture_url")} />
                                                 </label>
                                             </div>
                                         </div>
 
                                         {/* Personal Details */}
-                                        <h6 className="text-muted mb-3">Personal Details</h6>
+                                        <h6 className="text-muted mb-3">{t('settings.personalDetails')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">First Name <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.firstName')} <span className="text-danger">*</span></label>
                                                 <input {...register("first_name")} className={clsx("form-control", errors.first_name && "is-invalid")} />
                                                 {errors.first_name && <div className="invalid-feedback">{errors.first_name.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Last Name <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.lastName')} <span className="text-danger">*</span></label>
                                                 <input {...register("last_name")} className={clsx("form-control", errors.last_name && "is-invalid")} />
                                                 {errors.last_name && <div className="invalid-feedback">{errors.last_name.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Phone <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.phone')} <span className="text-danger">*</span></label>
                                                 <input {...register("phone")} className={clsx("form-control", errors.phone && "is-invalid")} />
                                                 {errors.phone && <div className="invalid-feedback">{errors.phone.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Occupation <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.occupation')} <span className="text-danger">*</span></label>
                                                 <input {...register("occupation")} className={clsx("form-control", errors.occupation && "is-invalid")} />
                                                 {errors.occupation && <div className="invalid-feedback">{errors.occupation.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Birth Date <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.birthDate')} <span className="text-danger">*</span></label>
                                                 <input type="date" {...register("birth_date")} className={clsx("form-control", errors.birth_date && "is-invalid")} />
                                                 {errors.birth_date && <div className="invalid-feedback">{errors.birth_date.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Domicile City <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.domicileCity')} <span className="text-danger">*</span></label>
                                                 <input {...register("domicile_city")} className={clsx("form-control", errors.domicile_city && "is-invalid")} />
                                                 {errors.domicile_city && <div className="invalid-feedback">{errors.domicile_city.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Marital Status</label>
+                                                <label className="form-label">{t('settings.maritalStatus')}</label>
                                                 <select {...register("marital_status")} className="form-control">
-                                                    <option value="">Select</option>
+                                                    <option value="">{t('settings.select')}</option>
                                                     {MARITAL_STATUS_OPTIONS.map(opt => (
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Number of Children</label>
+                                                <label className="form-label">{t('settings.childrenCount')}</label>
                                                 <input
                                                     type="number"
                                                     {...register("children_count")}
@@ -472,22 +474,22 @@ export default function CandidateProfileSetting() {
                                                     min={0}
                                                 />
                                                 {watchedMaritalStatus !== "MARRIED" && (
-                                                    <small className="text-muted">Only applicable for married candidates</small>
+                                                    <small className="text-muted">{t('settings.marriedOnly')}</small>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Japan Experience & Language */}
-                                        <h6 className="text-muted mb-3 mt-4">Japan Experience & Language</h6>
+                                        <h6 className="text-muted mb-3 mt-4">{t('settings.japanExperienceSection')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Japan Experience (Months)</label>
+                                                <label className="form-label">{t('settings.japanExperience')}</label>
                                                 <input type="number" {...register("japan_experience_duration")} className="form-control" />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Japanese Level (JLPT) <span className="text-muted small">(Optional)</span></label>
+                                                <label className="form-label">{t('settings.japaneseLevel')} <span className="text-muted small">({t('settings.optional')})</span></label>
                                                 <select {...register("japanese_level")} className="form-control">
-                                                    <option value="">Select</option>
+                                                    <option value="">{t('settings.select')}</option>
                                                     <option value="N5">N5</option>
                                                     <option value="N4">N4</option>
                                                     <option value="N3">N3</option>
@@ -496,26 +498,26 @@ export default function CandidateProfileSetting() {
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Japanese Speaking Level</label>
+                                                <label className="form-label">{t('settings.japaneseSpeakingLevel')}</label>
                                                 <select {...register("japanese_speaking_level")} className="form-control">
-                                                    <option value="">Select</option>
+                                                    <option value="">{t('settings.select')}</option>
                                                     {JAPANESE_SPEAKING_LEVEL_OPTIONS.map(opt => (
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">JLPT Certificate <span className="text-muted small">(Optional)</span></label>
+                                                <label className="form-label">{t('settings.jlptCertificate')} <span className="text-muted small">({t('settings.optional')})</span></label>
                                                 <input type="file" className="form-control" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, "japanese_certificate_url")} />
-                                                {watchedCert && <small className="text-success"><i className="mdi mdi-check-circle"></i> Uploaded</small>}
+                                                {watchedCert && <small className="text-success"><i className="mdi mdi-check-circle"></i> {t('common.uploaded')}</small>}
                                             </div>
                                         </div>
 
                                         {/* Core Competencies */}
-                                        <h6 className="text-muted mb-3 mt-4">Core Competencies</h6>
+                                        <h6 className="text-muted mb-3 mt-4">{t('settings.coreCompetencies')}</h6>
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">Main Job Fields <span className="text-muted small">(Select all that apply)</span></label>
+                                                <label className="form-label">{t('settings.mainJobFields')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="main_job_fields"
                                                     control={control}
@@ -545,24 +547,24 @@ export default function CandidateProfileSetting() {
                                                 />
                                             </div>
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">Golden Skill <span className="text-muted small">(Your strongest skill)</span></label>
-                                                <input {...register("golden_skill")} className="form-control" placeholder="e.g. TIG Welding, CNC Programming, Quality Inspection" />
+                                                <label className="form-label">{t('settings.goldenSkill')} <span className="text-muted small">({t('settings.strongestSkill')})</span></label>
+                                                <input {...register("golden_skill")} className="form-control" placeholder={t('settings.goldenSkillPlaceholder')} />
                                             </div>
                                         </div>
 
                                         {/* Expectations & Availability */}
-                                        <h6 className="text-muted mb-3 mt-4">Expectations & Availability</h6>
+                                        <h6 className="text-muted mb-3 mt-4">{t('settings.expectationsSection')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Expected Salary (IDR Netto/Month)</label>
-                                                <input type="number" {...register("expected_salary")} className="form-control" placeholder="e.g. 8000000" />
+                                                <label className="form-label">{t('settings.expectedSalary')}</label>
+                                                <input type="number" {...register("expected_salary")} className="form-control" placeholder={t('settings.salaryPlaceholder')} />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Japan Return Date</label>
+                                                <label className="form-label">{t('settings.japanReturnDate')}</label>
                                                 <input type="date" {...register("japan_return_date")} className="form-control" />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Available Start Date</label>
+                                                <label className="form-label">{t('settings.availableStartDate')}</label>
                                                 <input type="date" {...register("available_start_date")} className="form-control" />
                                             </div>
                                         </div>
@@ -570,7 +572,7 @@ export default function CandidateProfileSetting() {
                                         {/* Preferred Locations */}
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">Preferred Locations <span className="text-muted small">(Select all that apply)</span></label>
+                                                <label className="form-label">{t('settings.preferredLocations')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="preferred_locations"
                                                     control={control}
@@ -604,7 +606,7 @@ export default function CandidateProfileSetting() {
                                         {/* Preferred Industries */}
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">Preferred Industries <span className="text-muted small">(Select all that apply)</span></label>
+                                                <label className="form-label">{t('settings.preferredIndustries')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="preferred_industries"
                                                     control={control}
@@ -636,16 +638,16 @@ export default function CandidateProfileSetting() {
                                         </div>
 
                                         {/* Documents */}
-                                        <h6 className="text-muted mb-3 mt-4">Documents</h6>
+                                        <h6 className="text-muted mb-3 mt-4">{t('settings.documents')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">CV / Resume Document <span className="text-danger">*</span></label>
+                                                <label className="form-label">{t('settings.cvDocument')} <span className="text-danger">*</span></label>
                                                 <input type="file" className={clsx("form-control", errors.cv_url && "is-invalid")} accept=".pdf,.doc,.docx" onChange={(e) => handleFileUpload(e, "cv_url")} />
-                                                {watchedCvUrl && <small className="text-success"><i className="mdi mdi-check-circle"></i> Uploaded</small>}
+                                                {watchedCvUrl && <small className="text-success"><i className="mdi mdi-check-circle"></i> {t('common.uploaded')}</small>}
                                                 {errors.cv_url && <div className="invalid-feedback d-block">{errors.cv_url.message}</div>}
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Portfolio URL <span className="text-muted small">(Optional)</span></label>
+                                                <label className="form-label">{t('settings.portfolioUrl')} <span className="text-muted small">({t('settings.optional')})</span></label>
                                                 <input {...register("portfolio_url")} className="form-control" placeholder="https://linkedin.com/in/..." />
                                             </div>
                                         </div>
@@ -653,8 +655,8 @@ export default function CandidateProfileSetting() {
                                         {/* Intro */}
                                         <div className="row">
                                             <div className="col-md-12 mb-3">
-                                                <label className="form-label">Intro / Bio</label>
-                                                <textarea {...register("intro")} className="form-control" rows={3} placeholder="Tell us about yourself..." />
+                                                <label className="form-label">{t('settings.introBio')}</label>
+                                                <textarea {...register("intro")} className="form-control" rows={3} placeholder={t('settings.introPlaceholder')} />
                                             </div>
                                         </div>
 
@@ -663,13 +665,13 @@ export default function CandidateProfileSetting() {
                                             <div className="mt-4 pt-4 border-top">
                                                 <h6 className="text-muted mb-3">
                                                     <i className="mdi mdi-lock-outline me-2"></i>
-                                                    Onboarding Information <small className="text-muted">(Read-only)</small>
+                                                    {t('settings.onboardingInfo')} <small className="text-muted">({t('settings.readOnly')})</small>
                                                 </h6>
 
                                                 {(!onboardingData.completed_at && (!onboardingData.interests || onboardingData.interests.length === 0)) && (
                                                     <div className="alert alert-light text-muted small mb-3">
                                                         <i className="mdi mdi-information-outline me-1"></i>
-                                                        No onboarding data found. This section will populate after completing the onboarding wizard.
+                                                        {t('settings.noOnboardingData')}
                                                     </div>
                                                 )}
 
@@ -677,7 +679,7 @@ export default function CandidateProfileSetting() {
                                                     <div className="col-md-6 mb-3">
                                                         <label className="form-label text-muted">
                                                             <i className="mdi mdi-lock text-muted me-1" style={{ fontSize: '12px' }}></i>
-                                                            Job Interests
+                                                            {t('settings.jobInterests')}
                                                         </label>
                                                         <input
                                                             type="text"
@@ -691,7 +693,7 @@ export default function CandidateProfileSetting() {
                                                     <div className="col-md-6 mb-3">
                                                         <label className="form-label text-muted">
                                                             <i className="mdi mdi-lock text-muted me-1" style={{ fontSize: '12px' }}></i>
-                                                            LPK Training Center
+                                                            {t('settings.lpkTrainingCenter')}
                                                         </label>
                                                         <input
                                                             type="text"
@@ -705,7 +707,7 @@ export default function CandidateProfileSetting() {
                                                     <div className="col-md-12 mb-3">
                                                         <label className="form-label text-muted">
                                                             <i className="mdi mdi-lock text-muted me-1" style={{ fontSize: '12px' }}></i>
-                                                            Preferred Company Types
+                                                            {t('settings.preferredCompanyTypes')}
                                                         </label>
                                                         <input
                                                             type="text"
@@ -717,7 +719,7 @@ export default function CandidateProfileSetting() {
                                                         />
                                                         <small className="text-muted">
                                                             <i className="mdi mdi-information-outline me-1"></i>
-                                                            This data was collected during onboarding and cannot be modified here.
+                                                            {t('settings.onboardingDataNote')}
                                                         </small>
                                                     </div>
                                                 </div>
@@ -726,7 +728,7 @@ export default function CandidateProfileSetting() {
 
                                         <div className="mt-4 text-end">
                                             <button type="submit" className="btn btn-primary" disabled={updateMutation.isPending}>
-                                                {updateMutation.isPending ? "Saving..." : "Save Verification Data"}
+                                                {updateMutation.isPending ? t('settings.saving') : t('settings.saveButton')}
                                             </button>
                                         </div>
                                     </form>

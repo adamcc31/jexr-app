@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { CandidateWithFullDetails, Skill } from '@/types/candidate';
 import clsx from 'clsx';
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function ComputerSkillForm({ masterSkills }: Props) {
+    const { t } = useTranslation('candidate');
     const { register, formState: { errors } } = useFormContext<CandidateWithFullDetails>();
 
     // Filter only COMPUTER category skills
@@ -21,11 +23,11 @@ export function ComputerSkillForm({ masterSkills }: Props) {
 
     return (
         <div className="mb-0">
-            <h5 className="mb-4">Computer Skills</h5>
+            <h5 className="mb-4">{t('professional.computerSkills')}</h5>
 
             <div className="card border-0 bg-light p-3">
                 <small className="text-uppercase text-muted fw-bold mb-2 d-block">
-                    Technical & Software Skills
+                    {t('professional.technicalSoftware')}
                 </small>
                 <div className="d-flex flex-wrap gap-2">
                     {computerSkills.map(skill => (
@@ -49,17 +51,18 @@ export function ComputerSkillForm({ masterSkills }: Props) {
             </div>
 
             <div className="mt-3">
-                <label className="form-label fw-semibold">Other Computer Skills</label>
+                <label className="form-label fw-semibold">{t('professional.otherComputerSkills')}</label>
                 <div className="form-text mb-2">
-                    List any other software or technical skills not shown above (comma-separated).
+                    {t('professional.otherComputerSkillsHelp')}
                 </div>
                 <textarea
                     {...register('profile.skills_other')}
                     rows={2}
                     className={clsx("form-control", errors.profile?.skills_other && "is-invalid")}
-                    placeholder="e.g. Figma, Adobe Premiere, Python, etc."
+                    placeholder={t('professional.otherComputerSkillsPlaceholder')}
                 />
             </div>
         </div>
     );
 }
+

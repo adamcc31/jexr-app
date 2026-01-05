@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { CandidateWithFullDetails, Skill } from '@/types/candidate';
 import clsx from 'clsx';
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function SkillSetForm({ masterSkills }: Props) {
+    const { t } = useTranslation('candidate');
     const { register, formState: { errors } } = useFormContext<CandidateWithFullDetails>();
 
     // Group skills by category, excluding COMPUTER (handled separately)
@@ -25,7 +27,7 @@ export function SkillSetForm({ masterSkills }: Props) {
 
     return (
         <div className="mb-0">
-            <h5 className="mb-4">Skills & Expertise</h5>
+            <h5 className="mb-4">{t('professional.skills')}</h5>
 
             <div className="vstack gap-4">
                 {Object.entries(skillsByCategory).map(([category, skills]) => (
@@ -55,15 +57,15 @@ export function SkillSetForm({ masterSkills }: Props) {
             </div>
 
             <div className="mt-4">
-                <label className="form-label fw-semibold">Other Skills <span className="text-danger">*</span></label>
+                <label className="form-label fw-semibold">{t('professional.otherSkills')} <span className="text-danger">*</span></label>
                 <div className="form-text mb-2">
-                    Enter any other skills not listed above. Separate multiple skills with commas.
+                    {t('professional.otherSkillsHelp')}
                 </div>
                 <textarea
-                    {...register('profile.skills_other', { required: "Please describe your other skills or type 'None'" })}
+                    {...register('profile.skills_other', { required: t('professional.otherSkillsRequired') })}
                     rows={3}
                     className={clsx("form-control", errors.profile?.skills_other && "is-invalid")}
-                    placeholder="e.g. Critical Thinking, Public Speaking, Fortran"
+                    placeholder={t('professional.otherSkillsPlaceholder')}
                 />
                 {errors.profile?.skills_other && (
                     <div className="invalid-feedback">{errors.profile.skills_other.message}</div>
@@ -72,3 +74,4 @@ export function SkillSetForm({ masterSkills }: Props) {
         </div>
     );
 }
+
