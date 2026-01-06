@@ -11,9 +11,9 @@ import {
     fetchCandidatePreviews,
     fetchActiveJobs,
 } from '@/lib/employer-api';
-import { fetchPublicActiveJobs } from '@/lib/public-api';
+import { fetchPublicActiveJobs, fetchPublicJobDetails } from '@/lib/public-api';
 import type { JobCategory, CandidatePreview } from '@/types/job';
-import type { JobListResponse } from '@/types/employer';
+import type { JobListResponse, JobWithCompany } from '@/types/employer';
 
 /**
  * Check if user is authenticated via user_role cookie
@@ -103,4 +103,22 @@ export function useActiveJobs(limit = 12) {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 }
+
+// ============================================================================
+// Public Job Detail Hook
+// ============================================================================
+
+/**
+ * Fetch single job details for public access.
+ * Uses public API - no authentication required.
+ */
+export function usePublicJob(id: number) {
+    return useQuery<JobWithCompany, Error>({
+        queryKey: ['discovery', 'publicJob', id] as const,
+        queryFn: () => fetchPublicJobDetails(id),
+        enabled: id > 0,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+}
+
 

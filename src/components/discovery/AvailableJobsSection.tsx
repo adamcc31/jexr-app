@@ -45,7 +45,7 @@ function JobCard({ job }: { job: JobWithCompany }) {
         <div className="col-lg-4 col-md-6 col-12">
             <div className="job-post rounded shadow bg-white h-100">
                 <div className="p-4">
-                    <Link href={`/candidate/jobs/${job.id}`} className="text-dark title h5">
+                    <Link href={`/jobs/${job.id}`} className="text-dark title h5">
                         {job.title}
                     </Link>
 
@@ -190,7 +190,7 @@ export default function AvailableJobsSection() {
             {!isLoading && !error && jobs.length > 0 && (
                 <div className="row mt-4">
                     <div className="col-12 text-center">
-                        <Link href="/candidate/jobs" className="btn btn-primary">
+                        <Link href="/jobs" className="btn btn-primary">
                             View All Jobs <FiArrowRight className="ms-1" />
                         </Link>
                     </div>

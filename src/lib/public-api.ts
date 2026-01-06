@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import type { JobListResponse, ApiResponse } from '@/types/employer';
+import type { JobListResponse, ApiResponse, JobWithCompany } from '@/types/employer';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
 
@@ -31,6 +31,17 @@ export async function fetchPublicActiveJobs(limit = 12): Promise<JobListResponse
     const response = await publicApiClient.get<ApiResponse<JobListResponse>>(
         '/jobs/public',
         { params: { page: 1, page_size: limit } }
+    );
+    return response.data.data;
+}
+
+/**
+ * Fetch single job details for public access (no authentication required)
+ * Uses dedicated /jobs/public/:id endpoint - only returns active jobs
+ */
+export async function fetchPublicJobDetails(id: number): Promise<JobWithCompany> {
+    const response = await publicApiClient.get<ApiResponse<JobWithCompany>>(
+        `/jobs/public/${id}`
     );
     return response.data.data;
 }
