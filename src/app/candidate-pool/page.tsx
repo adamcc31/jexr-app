@@ -1,4 +1,4 @@
-'use client';
+
 
 import React from "react";
 import Link from "next/link";
@@ -8,10 +8,23 @@ import Footer from "../components/footer";
 import ScrollTop from "../components/scrollTop";
 
 import CandidatePreviewSection from "@/components/discovery/CandidatePreviewSection";
+import BreadcrumbSchema from "@/components/JsonLd/BreadcrumbSchema";
+
+export const metadata = {
+    title: 'Hire Japan-Trained Indonesian Talent - Candidate Pool',
+    description: 'Access our exclusive pool of Japan-ready Indonesian talent. Filter by skills, JLPT level, and experience. Hire disciplined Ex-Kenshusei today.',
+    alternates: {
+        canonical: '/candidate-pool',
+    },
+}
 
 export default function CandidatePool() {
     return (
         <>
+            <BreadcrumbSchema items={[
+                { label: 'Home', path: '/' },
+                { label: 'Candidate Pool', path: '/candidate-pool' }
+            ]} />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
 
             {/* Hero Section */}

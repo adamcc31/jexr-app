@@ -170,12 +170,15 @@ function RelatedJobCard({ job }: { job: JobWithCompany }) {
     );
 }
 
+import JobPostingSchema from "@/components/JsonLd/JobPostingSchema";
+
 // Main job detail content component
 function JobDetailContent({ job, relatedJobs }: { job: JobWithCompany; relatedJobs: JobWithCompany[] }) {
     const isActive = job.company_status === 'active';
 
     return (
         <>
+            <JobPostingSchema job={job} />
             {/* Hero Header Section */}
             <section className="bg-half-170 d-table w-100" style={{ backgroundImage: "url('/images/hero/bg.jpg')", backgroundPosition: 'center' }}>
                 <div className="bg-overlay bg-gradient-overlay"></div>

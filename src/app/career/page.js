@@ -8,10 +8,23 @@ import Footer from "../components/footer";
 import ScrollTop from "../components/scrollTop";
 
 import { jobOpenings } from "../data/data";
+import BreadcrumbSchema from "@/components/JsonLd/BreadcrumbSchema";
+
+export const metadata = {
+    title: 'Career at J Expert | Join Japan-Ready Talent Recruitment Team',
+    description: 'Explore career opportunities at J Expert. Join our team dedicated to connecting Japanese companies with disciplined Indonesian talent.',
+    alternates: {
+        canonical: '/career',
+    },
+}
 
 export default function Career() {
     return (
         <>
+            <BreadcrumbSchema items={[
+                { label: 'Home', path: '/' },
+                { label: 'Career', path: '/career' }
+            ]} />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
             <section className="bg-half-170 d-table w-100" style={{ backgroundImage: "url('/images/hero/bg.jpg')", backgroundPosition: 'top' }}>
                 <div className="bg-overlay bg-gradient-overlay"></div>

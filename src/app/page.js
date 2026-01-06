@@ -13,11 +13,23 @@ import ScrollTop from "./components/scrollTop";
 import Faq from "./components/faq";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import WebsiteSchema from "@/components/JsonLd/WebsiteSchema";
+import OrganizationSchema from "@/components/JsonLd/OrganizationSchema";
+
+export const metadata = {
+    title: 'J Expert | Japan-Ready Talent Recruitment Indonesia',
+    description: 'Find top Japan-trained Indonesian talent (ex-Kenshusei) for your company. J Expert bridges Japanese work ethics with Indonesian potential.',
+    alternates: {
+        canonical: 'https://jexpertrecruitment.com',
+    },
+}
 
 
 export default function IndexTwo() {
     return (
         <>
+            <WebsiteSchema />
+            <OrganizationSchema />
             <SpeedInsights />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
 

@@ -103,7 +103,7 @@ export default function Navbar({ navClass, navLight }) {
                         </li>
 
                         <li className={manu === "/job-categories" ? "active" : ""}>
-                            <Link href="/job-categories">Jobs</Link>
+                            <Link href="/job-categories">Job Categories</Link>
                         </li>
 
                         <li className={manu === "/candidate-pool" ? "active" : ""}>

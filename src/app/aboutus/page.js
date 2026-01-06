@@ -10,9 +10,25 @@ import ScrollTop from "../components/scrollTop";
 import { servicesData, teamData } from "../data/data";
 import { FiFacebook, FiInstagram, FiTwitter, FiHelpCircle } from "../assets/icons/vander"
 
+export const metadata = {
+    title: {
+        absolute: 'About J Expert | Specialist Ex-Kenshusei Recruitment Partner',
+    },
+    description: 'J Expert is the specialized recruitment partner connecting Japanese companies with disciplined, culturally aligned Indonesian talent (Kenshusei).',
+    alternates: {
+        canonical: '/aboutus',
+    },
+}
+
+import BreadcrumbSchema from "@/components/JsonLd/BreadcrumbSchema";
+
 export default function AboutUs() {
     return (
         <>
+            <BreadcrumbSchema items={[
+                { label: 'Home', path: '/' },
+                { label: 'About Us', path: '/aboutus' }
+            ]} />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
             <section className="bg-half-170 d-table w-100" style={{ backgroundImage: "url('/images/hero/bg.jpg')", backgroundPosition: 'top' }}>
                 <div className="bg-overlay bg-gradient-overlay"></div>

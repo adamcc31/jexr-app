@@ -1,4 +1,4 @@
-'use client';
+
 
 import React from "react";
 import Link from "next/link";
@@ -8,10 +8,23 @@ import Footer from "../components/footer";
 import ScrollTop from "../components/scrollTop";
 
 import AvailableJobsSection from "@/components/discovery/AvailableJobsSection";
+import BreadcrumbSchema from "@/components/JsonLd/BreadcrumbSchema";
+
+export const metadata = {
+    title: 'Browse Jobs for Ex-Kenshusei & Japan-Trained Talent',
+    description: 'Discover high-paying job opportunities for Ex-Kenshusei and Japan-trained talent in Indonesia. Manufacturing, Construction, Hospitality, and more.',
+    alternates: {
+        canonical: '/job-categories',
+    },
+}
 
 export default function JobCategories() {
     return (
         <>
+            <BreadcrumbSchema items={[
+                { label: 'Home', path: '/' },
+                { label: 'Job Categories', path: '/job-categories' }
+            ]} />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
 
             {/* Hero Section - Preserved */}

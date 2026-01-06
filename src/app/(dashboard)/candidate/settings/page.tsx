@@ -19,6 +19,7 @@ import { INTEREST_OPTIONS, COMPANY_PREFERENCE_OPTIONS } from "@/types/onboarding
 // --- Constants for HR Data Options ---
 
 const MARITAL_STATUS_OPTIONS = ["SINGLE", "MARRIED", "DIVORCED"] as const;
+const GENDER_OPTIONS = ["MALE", "FEMALE"] as const;
 const JAPANESE_SPEAKING_LEVEL_OPTIONS = ["NATIVE", "FLUENT", "BASIC", "PASSIVE"] as const;
 
 // Main Job Fields - Technical skills from Japan for Leader/Foreman positions
@@ -90,6 +91,7 @@ type AccountVerification = {
 
     // HR Candidate Data: Identity & Demographics
     birth_date?: string;
+    gender?: typeof GENDER_OPTIONS[number];
     domicile_city?: string;
     marital_status?: typeof MARITAL_STATUS_OPTIONS[number];
     children_count?: number;
@@ -131,6 +133,7 @@ const schema = z.object({
 
     // HR Candidate Data: Identity & Demographics
     birth_date: z.string().min(1, "Date of birth is required"),
+    gender: z.enum(GENDER_OPTIONS).optional().or(z.literal("")),
     domicile_city: z.string().min(1, "Domicile city is required"),
     marital_status: z.enum(MARITAL_STATUS_OPTIONS).optional().or(z.literal("")),
     children_count: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).optional(),
@@ -269,6 +272,7 @@ export default function CandidateProfileSetting() {
 
             // HR Candidate Data: Identity & Demographics
             setValue("birth_date", v.birth_date ? v.birth_date.split('T')[0] : "");
+            setValue("gender", v.gender || "");
             setValue("domicile_city", v.domicile_city || "");
             setValue("marital_status", v.marital_status || "");
             setValue("children_count", v.children_count || 0);
@@ -307,6 +311,7 @@ export default function CandidateProfileSetting() {
 
                     // HR Candidate Data: Identity & Demographics
                     birth_date: data.birth_date ? new Date(data.birth_date).toISOString() : null,
+                    gender: data.gender || null,
                     domicile_city: data.domicile_city || null,
                     marital_status: data.marital_status || null,
                     children_count: data.marital_status === "MARRIED" ? Number(data.children_count) : 0,
@@ -454,6 +459,14 @@ export default function CandidateProfileSetting() {
                                                 <label className="form-label">{t('settings.domicileCity')} <span className="text-danger">*</span></label>
                                                 <input {...register("domicile_city")} className={clsx("form-control", errors.domicile_city && "is-invalid")} />
                                                 {errors.domicile_city && <div className="invalid-feedback">{errors.domicile_city.message}</div>}
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label">{t('settings.gender')} <span className="text-danger">*</span></label>
+                                                <select {...register("gender")} className="form-control">
+                                                    <option value="">{t('settings.select')}</option>
+                                                    <option value="MALE">{t('settings.male')}</option>
+                                                    <option value="FEMALE">{t('settings.female')}</option>
+                                                </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="form-label">{t('settings.maritalStatus')}</label>

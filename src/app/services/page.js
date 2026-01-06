@@ -8,9 +8,23 @@ import ScrollTop from "../components/scrollTop";
 
 import { servicesData } from "../data/data";
 
+export const metadata = {
+    title: 'Recruitment Services for Japanese Companies',
+    description: 'End-to-end recruitment services: Staff to Manager placement, Kenshuusei career support, and Japan-standard training programs.',
+    alternates: {
+        canonical: '/services',
+    },
+}
+
+import BreadcrumbSchema from "@/components/JsonLd/BreadcrumbSchema";
+
 export default function Services() {
     return (
         <>
+            <BreadcrumbSchema items={[
+                { label: 'Home', path: '/' },
+                { label: 'Services', path: '/services' }
+            ]} />
             <Navbar navClass="defaultscroll sticky" navLight={true} />
             <section className="bg-half-170 d-table w-100" style={{ backgroundImage: 'url("/images/hero/bg.jpg")', backgroundPosition: 'top' }}>
                 <div className="bg-overlay bg-gradient-overlay"></div>

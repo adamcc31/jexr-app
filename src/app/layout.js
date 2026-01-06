@@ -12,8 +12,30 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata = {
-  title: 'J Expert - Your Specialist Partner for Japan-Ready Talent in Indonesia',
-  description: 'J Expert - Your Specialist Partner for Japan-Ready Talent in Indonesia',
+  title: {
+    template: '%s | J Expert',
+    default: 'J Expert - Japan-Ready Talent Recruitment Indonesia', // Fallback if no title is defined
+  },
+  description: 'J Expert connects Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent (ex-Kenshusei) for long-term success.',
+  metadataBase: new URL('https://jexpertrecruitment.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'J Expert - Japan-Ready Talent Recruitment Indonesia',
+    description: 'J Expert connects Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent.',
+    url: 'https://jexpertrecruitment.com',
+    siteName: 'J Expert',
+    images: [
+      {
+        url: '/images/share.png', // Assuming we have or will have a share image
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
 }
 
 // Mobile-first viewport configuration

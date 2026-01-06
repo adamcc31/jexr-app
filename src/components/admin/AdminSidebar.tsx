@@ -35,6 +35,11 @@ const adminNavItems: NavItem[] = [
         icon: 'solar:shield-check-bold-duotone',
     },
     {
+        label: 'ATS Dashboard',
+        href: '/admin/ats',
+        icon: 'solar:magnifer-bold-duotone',
+    },
+    {
         label: 'Company Verification', // Keeping this as legacy/specific if needed, or remove? Prompt said "new admin-only tab named Account Verification".
         href: '/admin/companies',
         icon: 'solar:buildings-2-bold-duotone',

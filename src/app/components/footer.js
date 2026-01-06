@@ -36,22 +36,40 @@ export default function Footer({ top }) {
                 <div className="row">
                     <div className="col-12">
                         <div className="py-5 footer-bar">
-                            <div className="row align-items-center">
-                                <div className="col-sm-3">
-                                    <div className="text-center text-sm-start">
-                                        <Link href=""><Image src='/images/logo-white.png' width={120} height={30} alt="" /></Link>
-                                    </div>
+                            <div className="row">
+                                <div className="col-lg-4 col-12 mb-0 mb-md-4 pb-0 pb-md-2">
+                                    <Link href="/" className="logo-footer">
+                                        <Image src='/images/logo-white.png' width={120} height={30} alt="" />
+                                    </Link>
+                                    <p className="mt-4 text-white-50">J Expert connects Japanese companies in Indonesia with highly disciplined, skilled, and culturally aligned Indonesian talent.</p>
                                 </div>
 
-                                {/* <div className="col-sm-9 mt-4 mt-sm-0">
-                                    <ul className="list-unstyled footer-list terms-service text-center text-sm-end mb-0">
-                                        <li className="list-inline-item my-2"><Link href="/" className="text-foot fs-6 fw-medium me-2"><i className="mdi mdi-circle-small"></i> Home</Link></li>
-                                        <li className="list-inline-item my-2"><Link href="/services" className="text-foot fs-6 fw-medium me-2"><i className="mdi mdi-circle-small"></i> How it works</Link></li>
-                                        <li className="list-inline-item my-2"><Link href="/job-post" className="text-foot fs-6 fw-medium me-2"><i className="mdi mdi-circle-small"></i> Create a job</Link></li>
-                                        <li className="list-inline-item my-2"><Link href="/aboutus" className="text-foot fs-6 fw-medium me-2"><i className="mdi mdi-circle-small"></i> About us</Link></li>
-                                        <li className="list-inline-item my-2"><Link href="/pricing" className="text-foot fs-6 fw-medium"><i className="mdi mdi-circle-small"></i> Plans</Link></li>
+                                <div className="col-lg-2 col-md-4 col-12 mt-4 mt-sm-0 pt-2 pt-sm-0">
+                                    <h5 className="text-white footer-head">Company</h5>
+                                    <ul className="list-unstyled footer-list mt-4">
+                                        <li><Link href="/" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Home</Link></li>
+                                        <li><Link href="/aboutus" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> About Us</Link></li>
+                                        <li><Link href="/services" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Services</Link></li>
                                     </ul>
-                                </div> */}
+                                </div>
+
+                                <div className="col-lg-3 col-md-4 col-12 mt-4 mt-sm-0 pt-2 pt-sm-0">
+                                    <h5 className="text-white footer-head">Recruitment</h5>
+                                    <ul className="list-unstyled footer-list mt-4">
+                                        <li><Link href="/job-categories" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Job Categories</Link></li>
+                                        <li><Link href="/candidate-pool" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Candidate Pool</Link></li>
+                                    </ul>
+                                </div>
+
+                                <div className="col-lg-3 col-md-4 col-12 mt-4 mt-sm-0 pt-2 pt-sm-0">
+                                    <h5 className="text-white footer-head">Support</h5>
+                                    <ul className="list-unstyled footer-list mt-4">
+                                        <li><Link href="/contactus" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Contact Us</Link></li>
+                                        <li><Link href="/helpcenter-overview" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Help Center</Link></li>
+                                        <li><Link href="/terms" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Terms</Link></li>
+                                        <li><Link href="/privacy" className="text-foot"><i className="mdi mdi-chevron-right me-1"></i> Privacy</Link></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
