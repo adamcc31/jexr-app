@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 // Dynamic import with SSR disabled - completely prevents server-side rendering

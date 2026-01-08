@@ -1,8 +1,8 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 // Dynamic import with SSR disabled - completely prevents server-side rendering
-// This is necessary because the component uses useSecurityAuth which requires
-// SecurityDashboardProvider context that's only available at runtime
 const DashboardContent = dynamic(() => import('./DashboardContent'), {
     ssr: false,
     loading: () => (

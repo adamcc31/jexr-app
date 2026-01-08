@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { SecurityDashboardProvider } from '@/contexts/SecurityDashboardContext';
-import '../globals.css';
 
 // Security Dashboard Layout - COMPLETELY ISOLATED from main app
 // Uses separate auth, separate session, no shared state
