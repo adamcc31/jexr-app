@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic';
+'use client';
 
-const ExportContent = dynamic(() => import('./ExportContent'), { ssr: false });
+import ExportContent from './ExportContent';
 
 export default function ExportPage() {
     return <ExportContent />;

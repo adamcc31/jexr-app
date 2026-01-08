@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic';
+'use client';
 
-const AdminContent = dynamic(() => import('./AdminContent'), { ssr: false });
+import AdminContent from './AdminContent';
 
 export default function AdminPage() {
     return <AdminContent />;
