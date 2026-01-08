@@ -1,5 +1,7 @@
 'use client';
 
+// Prevent static generation - requires runtime context
+export const dynamic = 'force-dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSecurityAuth } from '@/contexts/SecurityDashboardContext';
