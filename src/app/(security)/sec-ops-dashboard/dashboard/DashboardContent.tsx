@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSecurityAuth } from '@/contexts/SecurityDashboardContext';
+import Sidebar from '../components/Sidebar';
+import MetricCard from '../components/MetricCard';
+import ErrorPanel from '../components/ErrorPanel';
 
 // Types
 interface DashboardStats {
@@ -29,8 +32,7 @@ interface SecurityEvent {
     details?: Record<string, any>;
 }
 
-// API base URL for security dashboard - uses hidden endpoint
-// MUST match SECURITY_DASHBOARD_PATH in backend
+// API base URL for security dashboard
 const SECURITY_API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL + '/v1/sec-console-rahasia';
 
 export default function DashboardContent() {
@@ -42,6 +44,8 @@ export default function DashboardContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+    const [nextRefresh, setNextRefresh] = useState(30);
+    const [isRetrying, setIsRetrying] = useState(false);
 
     const fetchStats = useCallback(async () => {
         try {
@@ -49,19 +53,24 @@ export default function DashboardContent() {
             if (!res.ok) throw new Error('Failed to fetch stats');
             const data = await res.json();
             setStats(data.data);
+            setError('');
+            return true;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load stats');
+            return false;
         }
     }, []);
 
     const fetchEvents = useCallback(async () => {
         try {
-            const res = await fetch(`${SECURITY_API_BASE}/events?limit=20`, { credentials: 'include' });
+            const res = await fetch(`${SECURITY_API_BASE}/events?limit=15`, { credentials: 'include' });
             if (!res.ok) throw new Error('Failed to fetch events');
             const data = await res.json();
             setEvents(data.data?.events || []);
+            return true;
         } catch (err) {
             console.error('Failed to fetch events:', err);
+            return false;
         }
     }, []);
 
@@ -69,8 +78,34 @@ export default function DashboardContent() {
         setIsLoading(true);
         await Promise.all([fetchStats(), fetchEvents()]);
         setLastRefresh(new Date());
+        setNextRefresh(30);
         setIsLoading(false);
     }, [fetchStats, fetchEvents]);
+
+    const handleRetry = async () => {
+        setIsRetrying(true);
+        await refresh();
+        setIsRetrying(false);
+    };
+
+    const handleReauth = async () => {
+        await logout();
+        router.replace('/sec-ops-dashboard/login');
+    };
+
+    // Countdown timer effect
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNextRefresh(prev => {
+                if (prev <= 1) {
+                    refresh();
+                    return 30;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [refresh]);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -79,458 +114,629 @@ export default function DashboardContent() {
         }
         if (isAuthenticated) {
             refresh();
-            // Auto-refresh every 30 seconds
-            const interval = setInterval(refresh, 30000);
-            return () => clearInterval(interval);
         }
     }, [isAuthenticated, authLoading, router, refresh]);
 
     const getSeverityColor = (severity: string) => {
         const colors: Record<string, string> = {
-            'CRITICAL': '#dc2626',
-            'HIGH': '#ef4444',
-            'WARN': '#f59e0b',
-            'MEDIUM': '#3b82f6',
-            'INFO': '#10b981',
+            'CRITICAL': 'var(--sec-status-critical)',
+            'HIGH': 'var(--sec-status-high)',
+            'WARN': 'var(--sec-status-warning)',
+            'MEDIUM': 'var(--sec-status-info)',
+            'INFO': 'var(--sec-status-success)',
         };
-        return colors[severity] || '#6b7280';
+        return colors[severity] || 'var(--sec-status-neutral)';
     };
 
-    const getIntegrityStatusColor = (status: string) => {
-        const colors: Record<string, string> = {
-            'intact': '#10b981',
-            'degraded': '#f59e0b',
-            'compromised': '#dc2626',
+    const getIntegrityConfig = (status: string) => {
+        const configs: Record<string, { color: string; label: string; severity: 'success' | 'warning' | 'critical' }> = {
+            'intact': { color: 'var(--sec-status-success)', label: 'INTACT', severity: 'success' },
+            'degraded': { color: 'var(--sec-status-warning)', label: 'DEGRADED', severity: 'warning' },
+            'compromised': { color: 'var(--sec-status-critical)', label: 'COMPROMISED', severity: 'critical' },
         };
-        return colors[status] || '#6b7280';
-    };
-
-    const handleLogout = async () => {
-        await logout();
-        router.replace('/sec-ops-dashboard/login');
+        return configs[status] || { color: 'var(--sec-status-neutral)', label: 'UNKNOWN', severity: 'warning' as const };
     };
 
     if (authLoading) {
-        return <div className="loading">Loading...</div>;
+        return (
+            <div className="loading-screen">
+                <div className="loading-spinner" />
+                <p>Loading Security Console...</p>
+                <style jsx>{`
+                    .loading-screen {
+                        min-height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 20px;
+                    }
+                    .loading-spinner {
+                        width: 48px;
+                        height: 48px;
+                        border: 3px solid var(--sec-border);
+                        border-top-color: var(--sec-accent-primary);
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                    p { color: var(--sec-text-secondary); font-size: 14px; }
+                `}</style>
+            </div>
+        );
     }
 
+    const integrityConfig = getIntegrityConfig(stats?.integrityStatus || '');
+
     return (
-        <div className="dashboard">
-            {/* Header */}
-            <header className="dashboard-header">
-                <div className="header-left">
-                    <h1>🔒 Security Operations Center</h1>
-                    <span className="role-badge">{user?.role}</span>
-                </div>
-                <div className="header-right">
-                    <span className="last-refresh">
-                        Last refresh: {lastRefresh.toLocaleTimeString()}
-                    </span>
-                    <button onClick={refresh} className="refresh-btn" disabled={isLoading}>
-                        🔄 Refresh
-                    </button>
-                    <button onClick={handleLogout} className="logout-btn">
-                        Logout
-                    </button>
-                </div>
-            </header>
+        <div className="dashboard-layout">
+            <Sidebar />
 
-            {/* Navigation */}
-            <nav className="dashboard-nav">
-                <button className="nav-btn active">📊 Dashboard</button>
-                <button className="nav-btn" onClick={() => router.push('/sec-ops-dashboard/events')}>
-                    📋 Events
-                </button>
-                <button className="nav-btn" onClick={() => router.push('/sec-ops-dashboard/heatmap')}>
-                    🔥 Heatmap
-                </button>
-                {hasRole('SECURITY_ANALYST') && (
-                    <button className="nav-btn" onClick={() => router.push('/sec-ops-dashboard/export')}>
-                        📤 Export
-                    </button>
-                )}
-                {hasRole('SECURITY_ADMIN') && (
-                    <button className="nav-btn" onClick={() => router.push('/sec-ops-dashboard/admin')}>
-                        ⚙️ Admin
-                    </button>
-                )}
-            </nav>
-
-            {error && <div className="error-banner">{error}</div>}
-
-            {/* Stats Grid */}
-            <div className="stats-grid">
-                <div className="stat-card critical">
-                    <div className="stat-icon">🚨</div>
-                    <div className="stat-content">
-                        <div className="stat-value">{stats?.criticalEvents24h || 0}</div>
-                        <div className="stat-label">Critical Events (24h)</div>
+            <main className="dashboard-main">
+                {/* Header */}
+                <header className="dashboard-header">
+                    <div className="header-left">
+                        <h1>📊 Dashboard</h1>
+                        <span className="header-subtitle">Security Operations Overview</span>
                     </div>
-                </div>
-
-                <div className="stat-card warning">
-                    <div className="stat-icon">🔐</div>
-                    <div className="stat-content">
-                        <div className="stat-value">{stats?.failedLogins24h || 0}</div>
-                        <div className="stat-label">Failed Logins (24h)</div>
-                    </div>
-                </div>
-
-                <div className="stat-card danger">
-                    <div className="stat-icon">🚫</div>
-                    <div className="stat-content">
-                        <div className="stat-value">{stats?.blockedAttempts24h || 0}</div>
-                        <div className="stat-label">Blocked Attempts (24h)</div>
-                    </div>
-                </div>
-
-                <div className="total-card">
-                    <div className="stat-icon">📈</div>
-                    <div className="stat-content">
-                        <div className="stat-value">{stats?.totalEvents?.toLocaleString() || 0}</div>
-                        <div className="stat-label">Total Events</div>
-                    </div>
-                </div>
-
-                <div className={`integrity-card ${stats?.integrityStatus || 'unknown'}`}>
-                    <div className="stat-icon">🛡️</div>
-                    <div className="stat-content">
-                        <div className="stat-value" style={{ color: getIntegrityStatusColor(stats?.integrityStatus || '') }}>
-                            {stats?.integrityStatus?.toUpperCase() || 'UNKNOWN'}
-                        </div>
-                        <div className="stat-label">Log Integrity</div>
-                    </div>
-                </div>
-
-                {stats?.activeBreakGlass && stats.activeBreakGlass > 0 && (
-                    <div className="stat-card break-glass">
-                        <div className="stat-icon">⚡</div>
-                        <div className="stat-content">
-                            <div className="stat-value">{stats.activeBreakGlass}</div>
-                            <div className="stat-label">Active Break-Glass</div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Main Content - Two Columns */}
-            <div className="content-grid">
-                {/* Recent Events */}
-                <div className="content-card events-card">
-                    <h2>📋 Recent Security Events</h2>
-                    <div className="events-list">
-                        {events.map((event) => (
-                            <div key={event.id} className="event-row">
-                                <span
-                                    className="severity-badge"
-                                    style={{ backgroundColor: getSeverityColor(event.severity) }}
-                                >
-                                    {event.severity}
-                                </span>
-                                <span className="event-type">{event.eventType}</span>
-                                <span className="event-ip">{event.ip || '-'}</span>
-                                <span className="event-time">
-                                    {new Date(event.timestamp).toLocaleTimeString()}
-                                </span>
+                    <div className="header-right">
+                        <div className="refresh-info">
+                            <span className="last-refresh">
+                                Updated: {lastRefresh.toLocaleTimeString()}
+                            </span>
+                            <div className="refresh-progress">
+                                <div
+                                    className="refresh-bar"
+                                    style={{ width: `${(nextRefresh / 30) * 100}%` }}
+                                />
                             </div>
-                        ))}
-                        {events.length === 0 && (
-                            <p className="no-events">No recent events</p>
+                            <span className="next-refresh">Next in {nextRefresh}s</span>
+                        </div>
+                        <button
+                            className="refresh-btn"
+                            onClick={refresh}
+                            disabled={isLoading}
+                        >
+                            <span className={`refresh-icon ${isLoading ? 'spinning' : ''}`}>🔄</span>
+                            Refresh
+                        </button>
+                    </div>
+                </header>
+
+                {/* Error Panel */}
+                {error && (
+                    <div className="error-container">
+                        <ErrorPanel
+                            title="Failed to Fetch Statistics"
+                            message="Unable to connect to the security backend."
+                            details={[
+                                'Network connectivity issues',
+                                'Backend service unavailable',
+                                'Session expired or invalid',
+                            ]}
+                            onRetry={handleRetry}
+                            onReauth={handleReauth}
+                            timestamp={lastRefresh}
+                            isRetrying={isRetrying}
+                        />
+                    </div>
+                )}
+
+                {/* Stats Grid */}
+                <section className="stats-section">
+                    <div className="stats-grid">
+                        <MetricCard
+                            icon="🚨"
+                            value={stats?.criticalEvents24h || 0}
+                            label="Critical Events (24h)"
+                            severity={stats?.criticalEvents24h && stats.criticalEvents24h > 0 ? 'critical' : 'neutral'}
+                            pulse={stats?.criticalEvents24h && stats.criticalEvents24h > 5}
+                        />
+                        <MetricCard
+                            icon="🔐"
+                            value={stats?.failedLogins24h || 0}
+                            label="Failed Logins (24h)"
+                            severity={stats?.failedLogins24h && stats.failedLogins24h > 10 ? 'warning' : 'info'}
+                        />
+                        <MetricCard
+                            icon="🚫"
+                            value={stats?.blockedAttempts24h || 0}
+                            label="Blocked Attempts (24h)"
+                            severity={stats?.blockedAttempts24h && stats.blockedAttempts24h > 0 ? 'high' : 'neutral'}
+                        />
+                        <MetricCard
+                            icon="📈"
+                            value={stats?.totalEvents || 0}
+                            label="Total Events"
+                            severity="neutral"
+                        />
+                        <MetricCard
+                            icon="🛡️"
+                            value={integrityConfig.label}
+                            label="Log Integrity"
+                            severity={integrityConfig.severity}
+                        />
+                        {stats?.activeBreakGlass && stats.activeBreakGlass > 0 && (
+                            <MetricCard
+                                icon="⚡"
+                                value={stats.activeBreakGlass}
+                                label="Active Break-Glass"
+                                severity="critical"
+                                pulse
+                            />
                         )}
                     </div>
-                    <button
-                        className="view-all-btn"
-                        onClick={() => router.push('/sec-ops-dashboard/events')}
-                    >
-                        View All Events →
-                    </button>
-                </div>
+                </section>
 
-                {/* Top IPs */}
-                <div className="content-card ips-card">
-                    <h2>🌐 Top IPs (24h)</h2>
-                    <div className="ips-list">
-                        {stats?.topIps?.map((ip, idx) => (
-                            <div key={idx} className="ip-row">
-                                <span className="ip-address">{ip.ip}</span>
-                                <span className="ip-count">{ip.eventCount} events</span>
-                                <span
-                                    className="ip-severity"
-                                    style={{ color: getSeverityColor(ip.highestSeverity) }}
-                                >
-                                    {ip.highestSeverity}
-                                </span>
+                {/* Content Grid */}
+                <section className="content-section">
+                    <div className="content-grid">
+                        {/* Recent Events */}
+                        <div className="content-card events-card">
+                            <div className="card-header">
+                                <h2>📋 Recent Security Events</h2>
+                                <span className="event-count">{events.length} events</span>
                             </div>
-                        ))}
-                        {(!stats?.topIps || stats.topIps.length === 0) && (
-                            <p className="no-events">No IP data available</p>
-                        )}
-                    </div>
-                </div>
+                            <div className="events-list">
+                                {events.map((event) => (
+                                    <div key={event.id} className="event-row">
+                                        <span
+                                            className="severity-badge"
+                                            style={{
+                                                backgroundColor: getSeverityColor(event.severity),
+                                                boxShadow: `0 0 8px ${getSeverityColor(event.severity)}`
+                                            }}
+                                        >
+                                            {event.severity}
+                                        </span>
+                                        <span className="event-type">{event.eventType}</span>
+                                        <span className="event-ip mono">{event.ip || '-'}</span>
+                                        <span className="event-time mono">
+                                            {new Date(event.timestamp).toLocaleTimeString()}
+                                        </span>
+                                    </div>
+                                ))}
+                                {events.length === 0 && (
+                                    <div className="empty-state">
+                                        <span className="empty-icon">📭</span>
+                                        <p>No recent events</p>
+                                    </div>
+                                )}
+                            </div>
+                            <button
+                                className="view-all-btn"
+                                onClick={() => router.push('/sec-ops-dashboard/events')}
+                            >
+                                View All Events →
+                            </button>
+                        </div>
 
-                {/* Severity Breakdown */}
-                <div className="content-card severity-card">
-                    <h2>📊 Events by Severity (7 days)</h2>
-                    <div className="severity-bars">
-                        {Object.entries(stats?.eventsBySeverity || {}).map(([severity, count]) => (
-                            <div key={severity} className="severity-row">
-                                <span className="severity-label">{severity}</span>
-                                <div className="severity-bar-container">
-                                    <div
-                                        className="severity-bar"
-                                        style={{
-                                            width: `${Math.min((count as number) / (stats?.totalEvents || 1) * 100 * 10, 100)}%`,
-                                            backgroundColor: getSeverityColor(severity)
-                                        }}
-                                    />
-                                </div>
-                                <span className="severity-count">{(count as number).toLocaleString()}</span>
+                        {/* Top IPs */}
+                        <div className="content-card ips-card">
+                            <div className="card-header">
+                                <h2>🌐 Top IPs (24h)</h2>
                             </div>
-                        ))}
+                            <div className="ips-list">
+                                {stats?.topIps?.map((ip, idx) => (
+                                    <div key={idx} className="ip-row">
+                                        <span className="ip-rank">#{idx + 1}</span>
+                                        <span className="ip-address mono">{ip.ip}</span>
+                                        <div className="ip-stats">
+                                            <span className="ip-count">{ip.eventCount} events</span>
+                                            <span
+                                                className="ip-severity"
+                                                style={{ color: getSeverityColor(ip.highestSeverity) }}
+                                            >
+                                                {ip.highestSeverity}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {(!stats?.topIps || stats.topIps.length === 0) && (
+                                    <div className="empty-state">
+                                        <span className="empty-icon">🌍</span>
+                                        <p>No IP data available</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Severity Breakdown */}
+                        <div className="content-card severity-card">
+                            <div className="card-header">
+                                <h2>📊 Events by Severity (7 days)</h2>
+                            </div>
+                            <div className="severity-bars">
+                                {Object.entries(stats?.eventsBySeverity || {}).map(([severity, count]) => {
+                                    const maxCount = Math.max(...Object.values(stats?.eventsBySeverity || { default: 1 })) || 1;
+                                    const percentage = ((count as number) / maxCount) * 100;
+                                    return (
+                                        <div key={severity} className="severity-row">
+                                            <span className="severity-label">{severity}</span>
+                                            <div className="severity-bar-container">
+                                                <div
+                                                    className="severity-bar"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                        backgroundColor: getSeverityColor(severity),
+                                                        boxShadow: `0 0 12px ${getSeverityColor(severity)}`
+                                                    }}
+                                                />
+                                            </div>
+                                            <span className="severity-count mono">{(count as number).toLocaleString()}</span>
+                                        </div>
+                                    );
+                                })}
+                                {Object.keys(stats?.eventsBySeverity || {}).length === 0 && (
+                                    <div className="empty-state">
+                                        <span className="empty-icon">📉</span>
+                                        <p>No severity data</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </section>
+            </main>
 
             <style jsx>{`
-        .dashboard {
-          padding: 24px;
-          max-width: 1600px;
-          margin: 0 auto;
-        }
+                .dashboard-layout {
+                    display: flex;
+                    min-height: 100vh;
+                }
 
-        .loading {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--sec-text-muted);
-        }
+                .dashboard-main {
+                    flex: 1;
+                    margin-left: 240px;
+                    padding: 24px 32px;
+                    position: relative;
+                    z-index: 1;
+                }
 
-        .dashboard-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-          gap: 16px;
-        }
+                @media (max-width: 768px) {
+                    .dashboard-main {
+                        margin-left: 70px;
+                        padding: 16px;
+                    }
+                }
 
-        .header-left {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
+                /* Header */
+                .dashboard-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 28px;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                }
 
-        .header-left h1 {
-          font-size: 24px;
-          margin: 0;
-          color: #fff;
-        }
+                .header-left h1 {
+                    font-size: 28px;
+                    font-weight: 700;
+                    margin: 0;
+                    color: var(--sec-text-primary);
+                }
 
-        .role-badge {
-          padding: 4px 12px;
-          background: var(--sec-primary);
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 600;
-        }
+                .header-subtitle {
+                    color: var(--sec-text-secondary);
+                    font-size: 14px;
+                    margin-top: 4px;
+                    display: block;
+                }
 
-        .header-right {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
+                .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                }
 
-        .last-refresh {
-          color: var(--sec-text-muted);
-          font-size: 12px;
-        }
+                .refresh-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 10px 16px;
+                    background: var(--sec-bg-card);
+                    border: 1px solid var(--sec-border);
+                    border-radius: 10px;
+                }
 
-        .refresh-btn, .logout-btn {
-          padding: 8px 16px;
-          border: 1px solid var(--sec-border);
-          background: transparent;
-          border-radius: 8px;
-          color: var(--sec-text);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
+                .last-refresh, .next-refresh {
+                    font-size: 12px;
+                    color: var(--sec-text-secondary);
+                }
 
-        .refresh-btn:hover, .logout-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
+                .refresh-progress {
+                    width: 60px;
+                    height: 4px;
+                    background: var(--sec-border);
+                    border-radius: 2px;
+                    overflow: hidden;
+                }
 
-        .dashboard-nav {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        }
+                .refresh-bar {
+                    height: 100%;
+                    background: var(--sec-accent-primary);
+                    border-radius: 2px;
+                    transition: width 1s linear;
+                }
 
-        .nav-btn {
-          padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--sec-border);
-          border-radius: 8px;
-          color: var(--sec-text);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
+                .refresh-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 18px;
+                    background: var(--sec-bg-card);
+                    border: 1px solid var(--sec-border);
+                    border-radius: 10px;
+                    color: var(--sec-text-primary);
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
 
-        .nav-btn:hover, .nav-btn.active {
-          background: var(--sec-primary);
-          border-color: var(--sec-primary);
-          color: #000;
-        }
+                .refresh-btn:hover:not(:disabled) {
+                    background: var(--sec-bg-elevated);
+                    border-color: var(--sec-accent-primary);
+                }
 
-        .error-banner {
-          padding: 12px 16px;
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          border-radius: 8px;
-          color: #ef4444;
-          margin-bottom: 24px;
-        }
+                .refresh-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
 
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 16px;
-          margin-bottom: 24px;
-        }
+                .refresh-icon {
+                    font-size: 14px;
+                }
 
-        .stat-card, .total-card, .integrity-card {
-          padding: 20px;
-          background: var(--sec-bg-card);
-          border: 1px solid var(--sec-border);
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
+                .refresh-icon.spinning {
+                    animation: spin 1s linear infinite;
+                }
 
-        .stat-card.critical { border-left: 4px solid #dc2626; }
-        .stat-card.warning { border-left: 4px solid #f59e0b; }
-        .stat-card.danger { border-left: 4px solid #ef4444; }
-        .stat-card.break-glass { border-left: 4px solid #7c3aed; }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
 
-        .stat-icon { font-size: 32px; }
-        .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
-        .stat-label { font-size: 13px; color: var(--sec-text-muted); }
+                /* Error Container */
+                .error-container {
+                    margin-bottom: 24px;
+                }
 
-        .content-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-          gap: 24px;
-        }
+                /* Stats Section */
+                .stats-section {
+                    margin-bottom: 28px;
+                }
 
-        .content-card {
-          padding: 20px;
-          background: var(--sec-bg-card);
-          border: 1px solid var(--sec-border);
-          border-radius: 12px;
-        }
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 16px;
+                }
 
-        .content-card h2 {
-          font-size: 16px;
-          margin: 0 0 16px 0;
-          color: #fff;
-        }
+                /* Content Section */
+                .content-section {
+                    margin-bottom: 28px;
+                }
 
-        .events-list, .ips-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          max-height: 400px;
-          overflow-y: auto;
-        }
+                .content-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+                    gap: 20px;
+                }
 
-        .event-row, .ip-row {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px;
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 8px;
-        }
+                .content-card {
+                    background: var(--sec-bg-card);
+                    border: 1px solid var(--sec-border);
+                    border-radius: 14px;
+                    padding: 20px;
+                    backdrop-filter: blur(10px);
+                }
 
-        .severity-badge {
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-size: 11px;
-          font-weight: 600;
-          color: #fff;
-        }
+                .card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 16px;
+                }
 
-        .event-type { flex: 1; font-size: 13px; }
-        .event-ip { color: var(--sec-text-muted); font-size: 12px; }
-        .event-time { color: var(--sec-text-muted); font-size: 12px; }
+                .card-header h2 {
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: var(--sec-text-primary);
+                    margin: 0;
+                }
 
-        .ip-address { flex: 1; font-family: monospace; }
-        .ip-count { color: var(--sec-text-muted); font-size: 12px; }
+                .event-count {
+                    font-size: 12px;
+                    color: var(--sec-text-secondary);
+                    background: var(--sec-bg-elevated);
+                    padding: 4px 10px;
+                    border-radius: 12px;
+                }
 
-        .no-events {
-          color: var(--sec-text-muted);
-          text-align: center;
-          padding: 20px;
-        }
+                /* Events List */
+                .events-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    max-height: 360px;
+                    overflow-y: auto;
+                    padding-right: 8px;
+                }
 
-        .view-all-btn {
-          width: 100%;
-          padding: 12px;
-          background: rgba(0, 212, 255, 0.1);
-          border: 1px solid var(--sec-primary);
-          border-radius: 8px;
-          color: var(--sec-primary);
-          cursor: pointer;
-          margin-top: 16px;
-          transition: all 0.2s;
-        }
+                .event-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 10px 12px;
+                    background: rgba(255, 255, 255, 0.02);
+                    border-radius: 8px;
+                    transition: background 0.2s;
+                }
 
-        .view-all-btn:hover {
-          background: var(--sec-primary);
-          color: #000;
-        }
+                .event-row:hover {
+                    background: rgba(255, 255, 255, 0.04);
+                }
 
-        .severity-bars {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
+                .severity-badge {
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: 600;
+                    color: #fff;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
 
-        .severity-row {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+                .event-type {
+                    flex: 1;
+                    font-size: 13px;
+                    color: var(--sec-text-primary);
+                }
 
-        .severity-label {
-          width: 80px;
-          font-size: 12px;
-          color: var(--sec-text-muted);
-        }
+                .event-ip {
+                    color: var(--sec-text-secondary);
+                    font-size: 12px;
+                }
 
-        .severity-bar-container {
-          flex: 1;
-          height: 8px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-          overflow: hidden;
-        }
+                .event-time {
+                    color: var(--sec-text-muted);
+                    font-size: 11px;
+                }
 
-        .severity-bar {
-          height: 100%;
-          border-radius: 4px;
-          transition: width 0.3s ease;
-        }
+                .mono {
+                    font-family: var(--font-mono);
+                }
 
-        .severity-count {
-          width: 60px;
-          text-align: right;
-          font-size: 12px;
-          color: var(--sec-text-muted);
-        }
-      `}</style>
+                .view-all-btn {
+                    width: 100%;
+                    padding: 12px;
+                    margin-top: 16px;
+                    background: rgba(0, 180, 255, 0.08);
+                    border: 1px solid rgba(0, 180, 255, 0.2);
+                    border-radius: 8px;
+                    color: var(--sec-accent-primary);
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .view-all-btn:hover {
+                    background: rgba(0, 180, 255, 0.15);
+                    border-color: var(--sec-accent-primary);
+                }
+
+                /* IPs List */
+                .ips-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .ip-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px;
+                    background: rgba(255, 255, 255, 0.02);
+                    border-radius: 8px;
+                }
+
+                .ip-rank {
+                    width: 24px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: var(--sec-text-muted);
+                }
+
+                .ip-address {
+                    flex: 1;
+                    font-size: 13px;
+                    color: var(--sec-text-primary);
+                }
+
+                .ip-stats {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 2px;
+                }
+
+                .ip-count {
+                    font-size: 12px;
+                    color: var(--sec-text-secondary);
+                }
+
+                .ip-severity {
+                    font-size: 10px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+
+                /* Severity Bars */
+                .severity-bars {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                }
+
+                .severity-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .severity-label {
+                    width: 70px;
+                    font-size: 11px;
+                    font-weight: 500;
+                    color: var(--sec-text-secondary);
+                    text-transform: uppercase;
+                }
+
+                .severity-bar-container {
+                    flex: 1;
+                    height: 10px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 5px;
+                    overflow: hidden;
+                }
+
+                .severity-bar {
+                    height: 100%;
+                    border-radius: 5px;
+                    transition: width 0.5s ease-out;
+                }
+
+                .severity-count {
+                    width: 60px;
+                    text-align: right;
+                    font-size: 12px;
+                    color: var(--sec-text-secondary);
+                }
+
+                /* Empty State */
+                .empty-state {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 32px;
+                    text-align: center;
+                }
+
+                .empty-icon {
+                    font-size: 32px;
+                    margin-bottom: 12px;
+                    opacity: 0.5;
+                }
+
+                .empty-state p {
+                    margin: 0;
+                    color: var(--sec-text-muted);
+                    font-size: 13px;
+                }
+            `}</style>
         </div>
     );
 }
