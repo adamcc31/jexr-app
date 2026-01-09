@@ -115,40 +115,40 @@ const schema = z.object({
     first_name: z.string().min(1, "First name is required"),
     last_name: z.string().min(1, "Last name is required"),
     occupation: z.string().min(1, "Occupation is required"),
-    japan_experience_duration: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).optional(),
-    intro: z.string().optional(),
+    japan_experience_duration: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).refine(val => val > 0, "Japan experience duration is required"),
+    intro: z.string().min(1, "Intro/Bio is required"),
 
     // File URLs
-    profile_picture_url: z.string().optional(),
-    japanese_certificate_url: z.string().optional(),
+    profile_picture_url: z.string().min(1, "Profile picture is required"),
+    japanese_certificate_url: z.string().min(1, "JLPT Certificate is required"),
     cv_url: z.string().min(1, "CV/Resume document is required"),
-    portfolio_url: z.string().optional(),
+    portfolio_url: z.string().optional(), // Only optional field
 
     // Contact
     phone: z.string().min(1, "Phone number is required"),
-    website_url: z.string().optional(),
+    website_url: z.string().optional(), // Optional - not rendered in form
 
     // Japanese Level
-    japanese_level: z.string().optional(),
+    japanese_level: z.string().min(1, "Japanese Level (JLPT) is required"),
 
     // HR Candidate Data: Identity & Demographics
     birth_date: z.string().min(1, "Date of birth is required"),
-    gender: z.enum(GENDER_OPTIONS).optional().or(z.literal("")),
+    gender: z.enum(GENDER_OPTIONS, { errorMap: () => ({ message: "Gender is required" }) }),
     domicile_city: z.string().min(1, "Domicile city is required"),
-    marital_status: z.enum(MARITAL_STATUS_OPTIONS).optional().or(z.literal("")),
-    children_count: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).optional(),
+    marital_status: z.enum(MARITAL_STATUS_OPTIONS, { errorMap: () => ({ message: "Marital status is required" }) }),
+    children_count: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine(val => val >= 0, "Children count is required"),
 
     // HR Candidate Data: Core Competencies
-    main_job_fields: z.array(z.string()).optional(),
-    golden_skill: z.string().optional(),
-    japanese_speaking_level: z.enum(JAPANESE_SPEAKING_LEVEL_OPTIONS).optional().or(z.literal("")),
+    main_job_fields: z.array(z.string()).min(1, "At least one main job field is required"),
+    golden_skill: z.string().min(1, "Golden skill is required"),
+    japanese_speaking_level: z.enum(JAPANESE_SPEAKING_LEVEL_OPTIONS, { errorMap: () => ({ message: "Japanese speaking level is required" }) }),
 
     // HR Candidate Data: Expectations & Availability
-    expected_salary: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).optional(),
-    japan_return_date: z.string().optional(),
-    available_start_date: z.string().optional(),
-    preferred_locations: z.array(z.string()).optional(),
-    preferred_industries: z.array(z.string()).optional(),
+    expected_salary: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).refine(val => val > 0, "Expected salary is required"),
+    japan_return_date: z.string().min(1, "Japan return date is required"),
+    available_start_date: z.string().min(1, "Available start date is required"),
+    preferred_locations: z.array(z.string()).min(1, "At least one preferred location is required"),
+    preferred_industries: z.array(z.string()).min(1, "At least one preferred industry is required"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -240,7 +240,7 @@ export default function CandidateProfileSetting() {
 
     // 2. Identity Form
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
+    const { register, control, handleSubmit, setValue, watch, formState: { errors, isValid } } = useForm<FormData>({
         resolver: zodResolver(schema) as any,
         defaultValues: {
             japan_experience_duration: 0,
@@ -417,13 +417,19 @@ export default function CandidateProfileSetting() {
                                         {/* Profile Picture */}
                                         <div className="row mb-4">
                                             <div className="col-12 text-center">
-                                                <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#f0f0f0', margin: '0 auto', overflow: 'hidden' }}>
+                                                <label className="form-label fw-semibold">
+                                                    {t('settings.profilePicture')} <span className="text-danger">*</span>
+                                                </label>
+                                                <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#f0f0f0', margin: '0 auto', overflow: 'hidden', border: errors.profile_picture_url ? '2px solid #dc3545' : 'none' }}>
                                                     {watchedProfilePic ? <img src={watchedProfilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div className="d-flex align-items-center justify-content-center h-100 text-muted">{t('settings.noImage')}</div>}
                                                 </div>
                                                 <label className="btn btn-sm btn-primary mt-2">
                                                     {uploading ? "..." : t('settings.changePicture')}
                                                     <input type="file" className="d-none" accept="image/*" onChange={(e) => handleFileUpload(e, "profile_picture_url")} />
                                                 </label>
+                                                {errors.profile_picture_url && (
+                                                    <div className="text-danger small mt-1">{errors.profile_picture_url.message}</div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -469,7 +475,7 @@ export default function CandidateProfileSetting() {
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.maritalStatus')}</label>
+                                                <label className="form-label">{t('settings.maritalStatus')} <span className="text-danger">*</span></label>
                                                 <select {...register("marital_status")} className="form-control">
                                                     <option value="">{t('settings.select')}</option>
                                                     {MARITAL_STATUS_OPTIONS.map(opt => (
@@ -478,7 +484,7 @@ export default function CandidateProfileSetting() {
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.childrenCount')}</label>
+                                                <label className="form-label">{t('settings.childrenCount')} <span className="text-danger">*</span></label>
                                                 <input
                                                     type="number"
                                                     {...register("children_count")}
@@ -496,11 +502,11 @@ export default function CandidateProfileSetting() {
                                         <h6 className="text-muted mb-3 mt-4">{t('settings.japanExperienceSection')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.japanExperience')}</label>
+                                                <label className="form-label">{t('settings.japanExperience')} <span className="text-danger">*</span></label>
                                                 <input type="number" {...register("japan_experience_duration")} className="form-control" />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.japaneseLevel')} <span className="text-muted small">({t('settings.optional')})</span></label>
+                                                <label className="form-label">{t('settings.japaneseLevel')} <span className="text-danger">*</span></label>
                                                 <select {...register("japanese_level")} className="form-control">
                                                     <option value="">{t('settings.select')}</option>
                                                     <option value="N5">N5</option>
@@ -511,7 +517,7 @@ export default function CandidateProfileSetting() {
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.japaneseSpeakingLevel')}</label>
+                                                <label className="form-label">{t('settings.japaneseSpeakingLevel')} <span className="text-danger">*</span></label>
                                                 <select {...register("japanese_speaking_level")} className="form-control">
                                                     <option value="">{t('settings.select')}</option>
                                                     {JAPANESE_SPEAKING_LEVEL_OPTIONS.map(opt => (
@@ -520,7 +526,7 @@ export default function CandidateProfileSetting() {
                                                 </select>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.jlptCertificate')} <span className="text-muted small">({t('settings.optional')})</span></label>
+                                                <label className="form-label">{t('settings.jlptCertificate')} <span className="text-danger">*</span></label>
                                                 <input type="file" className="form-control" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, "japanese_certificate_url")} />
                                                 {watchedCert && <small className="text-success"><i className="mdi mdi-check-circle"></i> {t('common.uploaded')}</small>}
                                             </div>
@@ -530,7 +536,7 @@ export default function CandidateProfileSetting() {
                                         <h6 className="text-muted mb-3 mt-4">{t('settings.coreCompetencies')}</h6>
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">{t('settings.mainJobFields')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
+                                                <label className="form-label">{t('settings.mainJobFields')} <span className="text-danger">*</span> <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="main_job_fields"
                                                     control={control}
@@ -560,7 +566,7 @@ export default function CandidateProfileSetting() {
                                                 />
                                             </div>
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">{t('settings.goldenSkill')} <span className="text-muted small">({t('settings.strongestSkill')})</span></label>
+                                                <label className="form-label">{t('settings.goldenSkill')} <span className="text-danger">*</span> <span className="text-muted small">({t('settings.strongestSkill')})</span></label>
                                                 <input {...register("golden_skill")} className="form-control" placeholder={t('settings.goldenSkillPlaceholder')} />
                                             </div>
                                         </div>
@@ -569,15 +575,15 @@ export default function CandidateProfileSetting() {
                                         <h6 className="text-muted mb-3 mt-4">{t('settings.expectationsSection')}</h6>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.expectedSalary')}</label>
+                                                <label className="form-label">{t('settings.expectedSalary')} <span className="text-danger">*</span></label>
                                                 <input type="number" {...register("expected_salary")} className="form-control" placeholder={t('settings.salaryPlaceholder')} />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.japanReturnDate')}</label>
+                                                <label className="form-label">{t('settings.japanReturnDate')} <span className="text-danger">*</span></label>
                                                 <input type="date" {...register("japan_return_date")} className="form-control" />
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">{t('settings.availableStartDate')}</label>
+                                                <label className="form-label">{t('settings.availableStartDate')} <span className="text-danger">*</span></label>
                                                 <input type="date" {...register("available_start_date")} className="form-control" />
                                             </div>
                                         </div>
@@ -585,7 +591,7 @@ export default function CandidateProfileSetting() {
                                         {/* Preferred Locations */}
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">{t('settings.preferredLocations')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
+                                                <label className="form-label">{t('settings.preferredLocations')} <span className="text-danger">*</span> <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="preferred_locations"
                                                     control={control}
@@ -619,7 +625,7 @@ export default function CandidateProfileSetting() {
                                         {/* Preferred Industries */}
                                         <div className="row">
                                             <div className="col-12 mb-3">
-                                                <label className="form-label">{t('settings.preferredIndustries')} <span className="text-muted small">({t('settings.selectAll')})</span></label>
+                                                <label className="form-label">{t('settings.preferredIndustries')} <span className="text-danger">*</span> <span className="text-muted small">({t('settings.selectAll')})</span></label>
                                                 <Controller
                                                     name="preferred_industries"
                                                     control={control}
@@ -668,7 +674,7 @@ export default function CandidateProfileSetting() {
                                         {/* Intro */}
                                         <div className="row">
                                             <div className="col-md-12 mb-3">
-                                                <label className="form-label">{t('settings.introBio')}</label>
+                                                <label className="form-label">{t('settings.introBio')} <span className="text-danger">*</span></label>
                                                 <textarea {...register("intro")} className="form-control" rows={3} placeholder={t('settings.introPlaceholder')} />
                                             </div>
                                         </div>
@@ -740,7 +746,7 @@ export default function CandidateProfileSetting() {
                                         )}
 
                                         <div className="mt-4 text-end">
-                                            <button type="submit" className="btn btn-primary" disabled={updateMutation.isPending}>
+                                            <button type="submit" className="btn btn-primary" disabled={updateMutation.isPending || !isValid}>
                                                 {updateMutation.isPending ? t('settings.saving') : t('settings.saveButton')}
                                             </button>
                                         </div>

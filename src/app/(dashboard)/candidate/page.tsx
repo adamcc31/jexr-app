@@ -9,10 +9,11 @@ import NavbarDark from "../../components/navbarCandidate";
 import Footer from "../../components/footer";
 import { useJobs } from "@/hooks/useJobs";
 import { useCandidateProfile } from "@/hooks/useCandidate";
+import { useCandidateProfile as useFullCandidateProfile } from "@/hooks/useCandidateProfile";
 import { useMyApplications } from "@/hooks/useApplications";
 import { SkeletonCard, SkeletonStyles } from "@/components/employer";
 import type { JobWithCompany } from "@/types/employer";
-import type { CandidateVerification } from "@/types/candidate";
+import type { CandidateVerification, CandidateWithFullDetails } from "@/types/candidate";
 import { FiBriefcase, FiMapPin, FiClock, FiDollarSign } from "../../assets/icons/vander";
 
 // Helper functions
@@ -47,23 +48,56 @@ function formatRelativeTime(dateString: string, t: (key: string, options?: Recor
     return formatDate(dateString);
 }
 
-// Calculate profile completion (MANDATORY fields only)
-// JLPT Certificate, Portfolio URL, Intro are OPTIONAL and do NOT affect completion
-function calculateProfileCompletion(v: CandidateVerification | undefined): { percentage: number; missing: string[] } {
+// Calculate profile completion (ALL fields are MANDATORY except portfolio)
+// Includes Identity/Verification fields AND Professional Profile fields
+function calculateProfileCompletion(
+    v: CandidateVerification | undefined,
+    professionalProfile?: CandidateWithFullDetails | null
+): { percentage: number; missing: string[] } {
     if (!v) return { percentage: 0, missing: ['Profile not started'] };
 
-    // MANDATORY fields for verification
+    // ALL MANDATORY fields (only portfolio_url is optional)
     const mandatoryFields = [
+        // Personal Information
         { key: 'first_name', label: 'First Name', value: v.first_name },
         { key: 'last_name', label: 'Last Name', value: v.last_name },
         { key: 'profile_picture_url', label: 'Profile Picture', value: v.profile_picture_url },
         { key: 'occupation', label: 'Occupation', value: v.occupation },
         { key: 'phone', label: 'Phone', value: v.phone },
+        { key: 'intro', label: 'Intro/Bio', value: v.intro },
+
+        // Identity & Demographics
         { key: 'birth_date', label: 'Date of Birth', value: v.birth_date },
         { key: 'domicile_city', label: 'Domicile City', value: v.domicile_city },
-        { key: 'japan_experience_duration', label: 'Japan Experience', value: v.japan_experience_duration },
-        { key: 'cv_url', label: 'CV/Resume Document', value: v.cv_url }, // MANDATORY
-        // NOTE: japanese_level, japanese_certificate_url, portfolio_url, intro are OPTIONAL
+        { key: 'marital_status', label: 'Marital Status', value: v.marital_status },
+        { key: 'children_count', label: 'Children Count', value: v.children_count !== undefined && v.children_count !== null },
+
+        // Japanese Experience & Language
+        { key: 'japan_experience_duration', label: 'Japan Experience', value: v.japan_experience_duration && v.japan_experience_duration > 0 },
+        { key: 'japanese_level', label: 'Japanese Level (JLPT)', value: v.japanese_level },
+        { key: 'japanese_certificate_url', label: 'JLPT Certificate', value: v.japanese_certificate_url },
+        { key: 'japanese_speaking_level', label: 'Japanese Speaking Level', value: v.japanese_speaking_level },
+
+        // Documents
+        { key: 'cv_url', label: 'CV/Resume Document', value: v.cv_url },
+
+        // Core Competencies
+        { key: 'main_job_fields', label: 'Main Job Fields', value: v.main_job_fields && v.main_job_fields.length > 0 },
+        { key: 'golden_skill', label: 'Golden Skill', value: v.golden_skill },
+
+        // Expectations & Availability
+        { key: 'expected_salary', label: 'Expected Salary', value: v.expected_salary && v.expected_salary > 0 },
+        { key: 'japan_return_date', label: 'Japan Return Date', value: v.japan_return_date },
+        { key: 'available_start_date', label: 'Available Start Date', value: v.available_start_date },
+        { key: 'preferred_locations', label: 'Preferred Locations', value: v.preferred_locations && v.preferred_locations.length > 0 },
+        { key: 'preferred_industries', label: 'Preferred Industries', value: v.preferred_industries && v.preferred_industries.length > 0 },
+
+        // Professional Profile fields
+        { key: 'title', label: 'Professional Title', value: professionalProfile?.profile?.title },
+        { key: 'bio', label: 'Professional Bio', value: professionalProfile?.profile?.bio },
+        { key: 'highest_education', label: 'Education Level', value: professionalProfile?.profile?.highest_education },
+        { key: 'work_experiences', label: 'Work Experience', value: (professionalProfile?.work_experiences?.length ?? 0) > 0 },
+        { key: 'skills', label: 'Skills', value: (professionalProfile?.skill_ids?.length ?? 0) > 0 },
     ];
 
     const filled = mandatoryFields.filter(f => f.value).length;
@@ -133,6 +167,7 @@ export default function CandidateDashboard() {
     const { t } = useTranslation('candidate');
     const { data: jobsData, isLoading: isLoadingJobs, error: jobsError } = useJobs(1, 4);
     const { data: profileData, isLoading: isLoadingProfile } = useCandidateProfile();
+    const { profile: professionalProfile, loading: isLoadingProfessional } = useFullCandidateProfile();
     const { data: applications, isLoading: isLoadingApplications } = useMyApplications();
 
     const recentJobs = React.useMemo(() => {
@@ -142,7 +177,8 @@ export default function CandidateDashboard() {
 
     const totalJobs = jobsData?.total || 0;
     const verification = profileData?.verification;
-    const { percentage, missing } = calculateProfileCompletion(verification);
+    const isAnyProfileLoading = isLoadingProfile || isLoadingProfessional;
+    const { percentage, missing } = calculateProfileCompletion(verification, professionalProfile);
 
     // Application stats
     const applicationStats = React.useMemo(() => {
@@ -187,7 +223,7 @@ export default function CandidateDashboard() {
                     <SkeletonStyles />
 
                     {/* Incomplete Profile Warning Banner */}
-                    {!isLoadingProfile && percentage < 100 && (
+                    {!isAnyProfileLoading && percentage < 100 && (
                         <div className="row mb-4">
                             <div className="col-12">
                                 <div className="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
@@ -219,7 +255,7 @@ export default function CandidateDashboard() {
                                     <div className="row align-items-center">
                                         {/* Profile Picture */}
                                         <div className="col-lg-2 col-md-3 text-center mb-3 mb-md-0">
-                                            {isLoadingProfile ? (
+                                            {isAnyProfileLoading ? (
                                                 <div className="placeholder-glow">
                                                     <div className="rounded-circle bg-secondary placeholder mx-auto" style={{ width: 80, height: 80 }}></div>
                                                 </div>
@@ -242,7 +278,7 @@ export default function CandidateDashboard() {
                                         {/* Name & Verification */}
                                         <div className="col-lg-4 col-md-4">
                                             <h5 className="mb-1 fw-bold">
-                                                {isLoadingProfile ? (
+                                                {isAnyProfileLoading ? (
                                                     <span className="placeholder col-8"></span>
                                                 ) : (
                                                     verification?.first_name && verification?.last_name
@@ -376,7 +412,7 @@ export default function CandidateDashboard() {
                         </div>
 
                         <div className="col-md-3 mb-3">
-                            {isLoadingProfile ? (
+                            {isAnyProfileLoading ? (
                                 <SkeletonCard />
                             ) : (
                                 <div className="card shadow-sm border-0 h-100">
