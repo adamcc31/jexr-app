@@ -122,6 +122,38 @@ export default function EventsContent() {
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <p>Loading Security Console...</p>
+        <style jsx>{`
+          .loading-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+          .loading-spinner { width: 48px; height: 48px; border: 3px solid var(--sec-border); border-top-color: var(--sec-accent-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          p { color: var(--sec-text-secondary); font-size: 14px; }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Prevent rendering while redirecting to login
+  if (!isAuthenticated) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <p>Redirecting to login...</p>
+        <style jsx>{`
+          .loading-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+          .loading-spinner { width: 48px; height: 48px; border: 3px solid var(--sec-border); border-top-color: var(--sec-accent-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          p { color: var(--sec-text-secondary); font-size: 14px; }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <div className="events-layout">
       <Sidebar />
