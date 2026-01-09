@@ -43,11 +43,12 @@ export default function DashboardContent() {
     const [events, setEvents] = useState<SecurityEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+    const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
     const [nextRefresh, setNextRefresh] = useState(30);
     const [isRetrying, setIsRetrying] = useState(false);
 
     const fetchStats = useCallback(async () => {
+        if (!isAuthenticated) return false; // Guard against unauthenticated calls
         try {
             const res = await fetch(`${SECURITY_API_BASE}/stats`, { credentials: 'include' });
             if (!res.ok) throw new Error('Failed to fetch stats');
@@ -59,9 +60,10 @@ export default function DashboardContent() {
             setError(err instanceof Error ? err.message : 'Failed to load stats');
             return false;
         }
-    }, []);
+    }, [isAuthenticated]);
 
     const fetchEvents = useCallback(async () => {
+        if (!isAuthenticated) return false; // Guard against unauthenticated calls
         try {
             const res = await fetch(`${SECURITY_API_BASE}/events?limit=15`, { credentials: 'include' });
             if (!res.ok) throw new Error('Failed to fetch events');
@@ -72,7 +74,7 @@ export default function DashboardContent() {
             console.error('Failed to fetch events:', err);
             return false;
         }
-    }, []);
+    }, [isAuthenticated]);
 
     const refresh = useCallback(async () => {
         setIsLoading(true);
@@ -93,8 +95,10 @@ export default function DashboardContent() {
         router.replace('/sec-ops-dashboard/login');
     };
 
-    // Countdown timer effect
+    // Countdown timer effect - only start after authenticated
     useEffect(() => {
+        if (!isAuthenticated) return; // Don't start timer until authenticated
+
         const timer = setInterval(() => {
             setNextRefresh(prev => {
                 if (prev <= 1) {
@@ -105,7 +109,7 @@ export default function DashboardContent() {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [refresh]);
+    }, [refresh, isAuthenticated]);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -182,7 +186,7 @@ export default function DashboardContent() {
                     <div className="header-right">
                         <div className="refresh-info">
                             <span className="last-refresh">
-                                Updated: {lastRefresh.toLocaleTimeString()}
+                                Updated: {lastRefresh ? lastRefresh.toLocaleTimeString() : '--:--:--'}
                             </span>
                             <div className="refresh-progress">
                                 <div
