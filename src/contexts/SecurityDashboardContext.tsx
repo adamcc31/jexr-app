@@ -46,20 +46,34 @@ export function SecurityDashboardProvider({ children }: { children: React.ReactN
     useEffect(() => {
         const checkSession = async () => {
             try {
-                const res = await fetch(`${SECURITY_API_BASE}/stats`, {
+                // Try to verify existing session via /auth/me
+                const res = await fetch(`${SECURITY_API_BASE}/auth/me`, {
                     credentials: 'include',
                 });
                 if (res.ok) {
-                    // Session is valid - we can proceed
-                    setIsLoading(false);
+                    const data = await res.json();
+                    if (data.data?.user) {
+                        setUser({
+                            id: data.data.user.id || '',
+                            username: data.data.user.username || '',
+                            email: data.data.user.email || '',
+                            role: data.data.user.role,
+                            totpEnabled: true,
+                        });
+                        setSession({
+                            sessionId: data.data.sessionId || 'active',
+                            expiresAt: data.data.expiresAt || '',
+                            role: data.data.user.role,
+                        });
+                    }
                 } else {
                     setUser(null);
                     setSession(null);
-                    setIsLoading(false);
                 }
             } catch {
                 setUser(null);
                 setSession(null);
+            } finally {
                 setIsLoading(false);
             }
         };
