@@ -133,15 +133,15 @@ const schema = z.object({
 
     // HR Candidate Data: Identity & Demographics
     birth_date: z.string().min(1, "Date of birth is required"),
-    gender: z.enum(GENDER_OPTIONS, { errorMap: () => ({ message: "Gender is required" }) }),
+    gender: z.string().refine((val) => GENDER_OPTIONS.includes(val as typeof GENDER_OPTIONS[number]), "Gender is required"),
     domicile_city: z.string().min(1, "Domicile city is required"),
-    marital_status: z.enum(MARITAL_STATUS_OPTIONS, { errorMap: () => ({ message: "Marital status is required" }) }),
+    marital_status: z.string().refine((val) => MARITAL_STATUS_OPTIONS.includes(val as typeof MARITAL_STATUS_OPTIONS[number]), "Marital status is required"),
     children_count: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine(val => val >= 0, "Children count is required"),
 
     // HR Candidate Data: Core Competencies
     main_job_fields: z.array(z.string()).min(1, "At least one main job field is required"),
     golden_skill: z.string().min(1, "Golden skill is required"),
-    japanese_speaking_level: z.enum(JAPANESE_SPEAKING_LEVEL_OPTIONS, { errorMap: () => ({ message: "Japanese speaking level is required" }) }),
+    japanese_speaking_level: z.string().refine((val) => JAPANESE_SPEAKING_LEVEL_OPTIONS.includes(val as typeof JAPANESE_SPEAKING_LEVEL_OPTIONS[number]), "Japanese speaking level is required"),
 
     // HR Candidate Data: Expectations & Availability
     expected_salary: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).refine(val => val > 0, "Expected salary is required"),
