@@ -15,6 +15,19 @@ export default function I18nProvider({ children }: { children: React.ReactNode }
         if (storedLanguage && (storedLanguage === 'en' || storedLanguage === 'id')) {
             i18n.changeLanguage(storedLanguage);
             document.documentElement.lang = storedLanguage;
+        } else {
+            // No stored preference - check if user is a candidate
+            // Default candidates to Indonesian for better UX
+            const userRole = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('user_role='))
+                ?.split('=')[1];
+
+            if (userRole === 'candidate') {
+                i18n.changeLanguage('id');
+                localStorage.setItem(LANGUAGE_KEY, 'id');
+                document.documentElement.lang = 'id';
+            }
         }
         setIsInitialized(true);
     }, []);

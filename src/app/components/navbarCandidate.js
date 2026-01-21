@@ -152,8 +152,6 @@ export default function Navbar({ navClass, navLight }) {
                         <li className={manu === "/candidate/jobs" ? "active" : ""}>
                             <Link href="/candidate/jobs">{t('common.jobs')}</Link>
                         </li>
-
-                        <li className={manu === "/contactus" ? "active" : ""}><Link href="/contactus" className="sub-menu-item">{t('common.contactUs')}</Link></li>
                     </ul>
                 </div>
             </div>

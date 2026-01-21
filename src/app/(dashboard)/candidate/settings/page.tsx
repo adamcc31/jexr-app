@@ -200,7 +200,11 @@ export default function CandidateProfileSetting() {
     const { t } = useTranslation('candidate');
     const queryClient = useQueryClient();
     const [uploading, setUploading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'identity' | 'professional'>('identity');
+
+    // Read tab from URL query parameter (supports ?tab=professional from modal navigation)
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const initialTab = searchParams?.get('tab') === 'professional' ? 'professional' : 'identity';
+    const [activeTab, setActiveTab] = useState<'identity' | 'professional'>(initialTab);
 
     // 1. Fetch Verification Data
     const { data: profileData, isLoading } = useQuery<{ verification: AccountVerification }>({

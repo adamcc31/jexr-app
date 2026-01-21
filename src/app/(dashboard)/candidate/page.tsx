@@ -1,8 +1,9 @@
 'use client';
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import NavbarDark from "../../components/navbarCandidate";
@@ -12,6 +13,8 @@ import { useCandidateProfile } from "@/hooks/useCandidate";
 import { useCandidateProfile as useFullCandidateProfile } from "@/hooks/useCandidateProfile";
 import { useMyApplications } from "@/hooks/useApplications";
 import { SkeletonCard, SkeletonStyles } from "@/components/employer";
+import { ProfileCompletionModal } from "@/components/candidate/ProfileCompletionModal";
+import { calculateDetailedCompletion, POPUP_DISMISSED_KEY } from "@/lib/profileCompletionUtils";
 import type { JobWithCompany } from "@/types/employer";
 import type { CandidateVerification, CandidateWithFullDetails } from "@/types/candidate";
 import { FiBriefcase, FiMapPin, FiClock, FiDollarSign } from "../../assets/icons/vander";
@@ -165,10 +168,14 @@ function JobCard({ job, t }: { job: JobWithCompany; t: (key: string, options?: R
 
 export default function CandidateDashboard() {
     const { t } = useTranslation('candidate');
+    const router = useRouter();
     const { data: jobsData, isLoading: isLoadingJobs, error: jobsError } = useJobs(1, 4);
     const { data: profileData, isLoading: isLoadingProfile } = useCandidateProfile();
     const { profile: professionalProfile, loading: isLoadingProfessional } = useFullCandidateProfile();
     const { data: applications, isLoading: isLoadingApplications } = useMyApplications();
+
+    // Profile completion modal state
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
 
     const recentJobs = React.useMemo(() => {
         if (!jobsData?.jobs) return [];
@@ -179,6 +186,42 @@ export default function CandidateDashboard() {
     const verification = profileData?.verification;
     const isAnyProfileLoading = isLoadingProfile || isLoadingProfessional;
     const { percentage, missing } = calculateProfileCompletion(verification, professionalProfile);
+
+    // Calculate detailed completion for modal
+    const detailedCompletion = React.useMemo(() => {
+        return calculateDetailedCompletion(verification, professionalProfile);
+    }, [verification, professionalProfile]);
+
+    // Show completion modal if profile is incomplete
+    useEffect(() => {
+        if (isAnyProfileLoading) return;
+
+        // Check if popup was already dismissed this session
+        const dismissed = sessionStorage.getItem(POPUP_DISMISSED_KEY);
+        if (dismissed) return;
+
+        // Show modal if profile is not complete
+        if (!detailedCompletion.isComplete && detailedCompletion.percentage < 100) {
+            // Delay slightly to let the page render first
+            const timer = setTimeout(() => {
+                setShowCompletionModal(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [detailedCompletion, isAnyProfileLoading]);
+
+    // Handle navigation to settings from modal
+    const handleNavigateToSettings = (tab: 'identity' | 'professional') => {
+        setShowCompletionModal(false);
+        sessionStorage.setItem(POPUP_DISMISSED_KEY, 'true');
+        router.push(`/candidate/settings?tab=${tab}`);
+    };
+
+    // Handle modal dismiss
+    const handleDismissModal = () => {
+        setShowCompletionModal(false);
+        sessionStorage.setItem(POPUP_DISMISSED_KEY, 'true');
+    };
 
     // Application stats
     const applicationStats = React.useMemo(() => {
@@ -594,6 +637,16 @@ export default function CandidateDashboard() {
                 </div>
             </section>
             <Footer top={true} />
+
+            {/* Profile Completion Modal */}
+            <ProfileCompletionModal
+                show={showCompletionModal}
+                onClose={handleDismissModal}
+                onNavigate={handleNavigateToSettings}
+                percentage={detailedCompletion.percentage}
+                missingIdentity={detailedCompletion.missingIdentity}
+                missingProfessional={detailedCompletion.missingProfessional}
+            />
         </>
     )
 }
