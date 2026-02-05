@@ -10,7 +10,7 @@ import JobFilterSidebar, { JobFilters, initialFilters, countActiveFilters } from
 
 import { useJobs } from "@/hooks/useJobs";
 import type { JobWithCompany } from "@/types/employer";
-import { FiClock, FiMapPin, FiDollarSign, FiBriefcase, FiMonitor, FiAward } from "../../../assets/icons/vander";
+import { FiClock, FiMapPin, FiBriefcase, FiMonitor, FiAward, FiDollarSign } from "react-icons/fi";
 
 // Helper to format salary
 function formatSalary(min: number, max: number): string {
@@ -39,7 +39,7 @@ function formatDate(dateString: string): string {
 // Enhanced Job Card Component
 function JobCard({ job }: { job: JobWithCompany }) {
     return (
-        <div className="col-12">
+        <div className="col-lg-6 col-12">
             <div className="job-post rounded shadow bg-white overflow-hidden transition-all" style={{ transition: 'all 0.2s ease' }}>
                 <div className="p-4">
                     <div className="d-flex justify-content-between align-items-start">
@@ -112,18 +112,20 @@ function JobCard({ job }: { job: JobWithCompany }) {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="d-flex gap-2 ms-auto">
-                        <Link
-                            href={`/candidate/jobs/${job.id}`}
-                            className="btn btn-sm btn-soft-primary"
-                        >
-                            See Details
-                        </Link>
+                    <div className="d-flex flex-column gap-2 ms-auto" style={{ minWidth: '120px' }}>
                         <Link
                             href={`/candidate/jobs/${job.id}/apply`}
-                            className="btn btn-sm btn-primary"
+                            className="btn btn-sm btn-primary w-100 py-1"
+                            style={{ fontSize: '11px' }}
                         >
-                            Apply Now
+                            APPLY NOW
+                        </Link>
+                        <Link
+                            href={`/candidate/jobs/${job.id}`}
+                            className="btn btn-sm btn-soft-primary w-100 py-1"
+                            style={{ fontSize: '11px' }}
+                        >
+                            SEE DETAILS
                         </Link>
                     </div>
                 </div>
@@ -135,7 +137,7 @@ function JobCard({ job }: { job: JobWithCompany }) {
 // Loading skeleton
 function JobCardSkeleton() {
     return (
-        <div className="col-12">
+        <div className="col-lg-6 col-12">
             <div className="job-post rounded shadow bg-white">
                 <div className="p-4 placeholder-glow">
                     <div className="placeholder col-8 mb-3" style={{ height: 24 }}></div>
@@ -186,7 +188,8 @@ export default function JobListPage() {
     const [pageSize, setPageSize] = useState(10);
     const [filters, setFilters] = useState<JobFilters>(initialFilters);
 
-    const { data, isLoading, error } = useJobs(page, pageSize);
+    // Fetch up to 100 jobs to allow proper client-side filtering and pagination
+    const { data, isLoading, error } = useJobs(1, 100);
 
     // Handler for page size change - resets page to 1
     const handlePageSizeChange = (newSize: number) => {

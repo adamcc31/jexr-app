@@ -81,8 +81,8 @@ export default function Footer({ top }) {
                     <div className="row align-items-center">
                         <div className="col-sm-6">
                             <div className="text-sm-start">
-                                <p className="mb-0 fw-medium">PT. PUSAT REKRUTMEN INDONESIA JEPANG</p>
-                                <p className="mb-0 fw-medium">© {new Date().getFullYear()} J Expert — Part of Exata Group <i>All rights reserved</i></p>
+                                <p className="mb-0 fw-medium">PT PUSAT REKRUTMEN INDONESIA JEPANG</p>
+                                <p className="mb-0 fw-medium">© {new Date().getFullYear()} J Expert Recruitment — Part of Exata Group <i>All rights reserved</i></p>
                                 <p className="mb-0 fw-medium"><i>Your Specialist Partner for Japan-Ready Talent in Indonesia</i></p>
                             </div>
                         </div>
