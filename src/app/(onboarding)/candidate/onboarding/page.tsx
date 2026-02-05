@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { submitOnboarding, searchLPK } from '@/lib/candidate-api';
+import React, { useState, useCallback, useEffect } from 'react';
+import { searchLPK } from '@/lib/candidate-api';
+import { submitOnboardingAction } from './actions';
 import {
     type InterestKey,
     type CompanyPreferenceKey,
@@ -15,7 +15,6 @@ import styles from './onboarding.module.css';
 const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
-    const router = useRouter();
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
     // Form State
@@ -99,13 +98,18 @@ export default function OnboardingPage() {
                 birth_date: birthDate,
             };
 
-            await submitOnboarding(data);
-            router.push('/candidate');
-            router.refresh();
+            // Server Action handles: submit → revalidatePath (blocking) → redirect
+            // This ensures fresh data before navigation, preventing stale state loops
+            const result = await submitOnboardingAction(data);
+
+            if (result?.error) {
+                setError(result.error);
+                setIsSubmitting(false);
+            }
+            // Note: If successful, the Server Action redirects - we won't reach here
         } catch (err) {
             console.error('Onboarding submission failed:', err);
             setError('Terjadi kesalahan. Silakan coba lagi.');
-        } finally {
             setIsSubmitting(false);
         }
     };

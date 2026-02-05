@@ -1,21 +1,38 @@
 'use client'
 
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { login } from "./actions";
 import { useActionState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const initialState = {
     error: '',
+    success: false,
+    role: '',
 }
 
 // Separate component that uses useSearchParams
 function LoginForm() {
     const [state, action, isPending] = useActionState(login, initialState);
+    const router = useRouter();
     const searchParams = useSearchParams();
     const isExpired = searchParams.get('expired') === 'true';
+    const didNavigateRef = useRef(false);
+
+    useEffect(() => {
+        if (!state?.success || didNavigateRef.current) return;
+        didNavigateRef.current = true;
+        const role = state.role || 'candidate';
+        if (role === 'admin') {
+            router.replace('/admin');
+        } else if (role === 'candidate') {
+            router.replace('/candidate');
+        } else {
+            router.replace('/dashboard-employer');
+        }
+    }, [router, state?.role, state?.success]);
 
     return (
         <form action={action}>

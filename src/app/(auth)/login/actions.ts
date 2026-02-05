@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { apiClient } from '@/lib/api'
 import { AxiosError } from 'axios'
 import { cookies } from 'next/headers'
@@ -58,18 +57,7 @@ export async function login(prevState: any, formData: FormData) {
             cookieStore.set('user_role', role, { path: '/' });
         }
 
-        // Success - redirect based on role
-        // Return path to redirect to, let the client component handle the actual redirection
-        // or redirect here if strictly server-side
-
-        // Implementation choice: Redirect here
-        if (role === 'admin') {
-            redirect('/admin')
-        } else if (role === 'candidate') {
-            redirect('/candidate')
-        } else {
-            redirect('/dashboard-employer')
-        }
+        return { error: '', success: true, role }
 
     } catch (error) {
         if (error instanceof AxiosError) {
@@ -79,13 +67,9 @@ export async function login(prevState: any, formData: FormData) {
                 data: error.response?.data,
                 headers: error.response?.headers
             });
-            return { error: message }
-        }
-        // Handle redirect error specifically (Next.js redirects throw an error)
-        if ((error as any).message === 'NEXT_REDIRECT') {
-            throw error;
+            return { error: message, success: false, role: '' }
         }
         console.error('Unexpected Login Error:', error);
-        return { error: 'An unexpected error occurred' }
+        return { error: 'An unexpected error occurred', success: false, role: '' }
     }
 }

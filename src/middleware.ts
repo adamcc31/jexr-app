@@ -33,6 +33,9 @@ function isAuthPage(path: string): boolean {
 export async function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname
     const method = request.method
+
+
+
     // =====================================================
     // RATE LIMITING FOR AUTH PAGES (Server Actions)
     // Applied to POST requests on login/register pages
@@ -68,6 +71,7 @@ export async function middleware(request: NextRequest) {
         // Add rate limit headers to successful responses for transparency
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('x-pathname', path)
+        requestHeaders.set('x-url', request.nextUrl.href)
         const response = NextResponse.next({
             request: {
                 headers: requestHeaders,
@@ -82,8 +86,12 @@ export async function middleware(request: NextRequest) {
     // =====================================================
     // Consolidate header preparation.
     // If not handled by rate limiter, we create new headers here.
+    // Normalize path: remove trailing slash for consistent detection in layout guards
+    const normalizedPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
+
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-pathname', path)
+    requestHeaders.set('x-pathname', normalizedPath)
+    requestHeaders.set('x-url', request.nextUrl.href)
     // =====================================================
     // ROLE-BASED ROUTE PROTECTION
     // =====================================================
@@ -91,6 +99,7 @@ export async function middleware(request: NextRequest) {
     if (path.startsWith('/dashboard-employer')) {
         const allowedRoles = ['employer', 'admin']
         if (userRole && !allowedRoles.includes(userRole)) {
+            console.log(`[Middleware] Redirecting unauthorized access to /dashboard-employer from ${userRole} to /candidate`)
             return NextResponse.redirect(new URL('/candidate', request.url))
         }
     }
@@ -102,14 +111,6 @@ export async function middleware(request: NextRequest) {
 }
 export const config = {
     matcher: [
-        // Rate limiting for auth pages
-        '/login',
-        '/register',
-        '/reset-password',
-        '/forgot-password',
-        // Routes requiring middleware (layout.js checks x-pathname)
-        '/dashboard-employer/:path*',
-        '/candidate/:path*',
-        '/admin/:path*',
+        '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
     ],
 }

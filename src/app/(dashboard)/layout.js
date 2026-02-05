@@ -21,12 +21,16 @@ export default async function DashboardLayout({ children }) {
     let authValid = false;
     let userData = null;
 
+    const authController = new AbortController();
+    const authTimeoutId = setTimeout(() => authController.abort(), 3000);
+
     try {
         const res = await fetch(`${API_URL}/auth/me`, {
             headers: {
                 Authorization: `Bearer ${token.value}`,
             },
             cache: 'no-store',
+            signal: authController.signal,
         });
 
         if (!res.ok) {
@@ -38,19 +42,25 @@ export default async function DashboardLayout({ children }) {
         userData = responseJson.data; // User object (now includes onboarding_completed)
         authValid = true;
     } catch (error) {
+        if (error?.digest?.startsWith('NEXT_REDIRECT') || error?.message === 'NEXT_REDIRECT') {
+            throw error;
+        }
         // Backend unavailable - for development, allow access if token exists
-        console.warn('Backend unavailable for auth validation:', error.message);
+        console.warn('Backend unavailable for auth validation:', error?.message || String(error));
         authValid = true; // Allow in development
+    } finally {
+        clearTimeout(authTimeoutId);
     }
 
     // 3. Onboarding Guard - Check if candidate needs onboarding
+    // SIMPLIFIED: Use simple includes() check like in backup version
     const headersList = await headers();
     const pathname = headersList.get('x-pathname') || '';
     const isOnboardingPage = pathname.includes('/onboarding');
 
     // ONLY enforce if we successfully got data from backend (userData exists)
-    // AND we successfully detected the pathname (to avoid redirect loops if middleware header is missing)
-    if (authValid && userData && pathname && userRole === 'candidate' && !isOnboardingPage) {
+    // If backend was down (userData is null), we skip enforcement to avoid locking properly authenticated users out
+    if (authValid && userData && userRole === 'candidate' && !isOnboardingPage) {
         // onboarding_completed comes from the enhanced /auth/me endpoint
         const isCompleted = userData.onboarding_completed;
 

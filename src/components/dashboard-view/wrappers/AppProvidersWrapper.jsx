@@ -12,6 +12,7 @@ const AppProvidersWrapper = ({
   children
 }) => {
   useEffect(() => {
+    console.log('[AppProvidersWrapper] Mounted/Updated', new Date().toISOString());
     const splashElement = document.querySelector('#__next_splash');
     const splashScreen = document.querySelector('#splash-screen');
     if (!splashElement || !splashScreen) return;
