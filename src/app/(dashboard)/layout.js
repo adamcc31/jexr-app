@@ -49,8 +49,8 @@ export default async function DashboardLayout({ children }) {
     const isOnboardingPage = pathname.includes('/onboarding');
 
     // ONLY enforce if we successfully got data from backend (userData exists)
-    // If backend was down (userData is null), we skip enforcement to avoid locking properly authenticated users out
-    if (authValid && userData && userRole === 'candidate' && !isOnboardingPage) {
+    // AND we successfully detected the pathname (to avoid redirect loops if middleware header is missing)
+    if (authValid && userData && pathname && userRole === 'candidate' && !isOnboardingPage) {
         // onboarding_completed comes from the enhanced /auth/me endpoint
         const isCompleted = userData.onboarding_completed;
 
