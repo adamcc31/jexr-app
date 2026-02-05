@@ -21,6 +21,15 @@ import { INTEREST_OPTIONS, COMPANY_PREFERENCE_OPTIONS } from "@/types/onboarding
 const MARITAL_STATUS_OPTIONS = ["SINGLE", "MARRIED", "DIVORCED"] as const;
 const GENDER_OPTIONS = ["MALE", "FEMALE"] as const;
 const JAPANESE_SPEAKING_LEVEL_OPTIONS = ["NATIVE", "FLUENT", "BASIC", "PASSIVE"] as const;
+const RELIGION_OPTIONS = [
+    { value: "ISLAM", label: "Islam" },
+    { value: "KRISTEN", label: "Kristen (Protestan)" },
+    { value: "KATOLIK", label: "Katolik" },
+    { value: "HINDU", label: "Hindu" },
+    { value: "BUDDHA", label: "Buddha" },
+    { value: "KONGHUCU", label: "Konghucu" },
+    { value: "OTHER", label: "Lainnya" },
+] as const;
 
 // Main Job Fields - Technical skills from Japan for Leader/Foreman positions
 const MAIN_JOB_FIELD_OPTIONS = [
@@ -101,6 +110,14 @@ type AccountVerification = {
     golden_skill?: string;
     japanese_speaking_level?: typeof JAPANESE_SPEAKING_LEVEL_OPTIONS[number];
 
+    // HR Candidate Data: Physical Attributes
+    height_cm?: number;
+    weight_kg?: number;
+    religion?: string;
+
+    // JLPT Certificate Extension
+    jlpt_certificate_issue_year?: number;
+
     // HR Candidate Data: Expectations & Availability
     expected_salary?: number;
     japan_return_date?: string;
@@ -142,6 +159,14 @@ const schema = z.object({
     main_job_fields: z.array(z.string()).min(1, "At least one main job field is required"),
     golden_skill: z.string().min(1, "Golden skill is required"),
     japanese_speaking_level: z.string().refine((val) => JAPANESE_SPEAKING_LEVEL_OPTIONS.includes(val as typeof JAPANESE_SPEAKING_LEVEL_OPTIONS[number]), "Japanese speaking level is required"),
+
+    // HR Candidate Data: Physical Attributes (required)
+    height_cm: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine(val => val > 0, "Height is required"),
+    weight_kg: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine(val => val > 0, "Weight is required"),
+    religion: z.string().min(1, "Religion is required"),
+
+    // JLPT Certificate Extension (optional)
+    jlpt_certificate_issue_year: z.union([z.string(), z.number()]).transform((val) => Number(val) || undefined).optional(),
 
     // HR Candidate Data: Expectations & Availability
     expected_salary: z.union([z.string(), z.number()]).transform((val) => Number(val) || 0).refine(val => val > 0, "Expected salary is required"),
@@ -286,6 +311,14 @@ export default function CandidateProfileSetting() {
             setValue("golden_skill", v.golden_skill || "");
             setValue("japanese_speaking_level", v.japanese_speaking_level || "");
 
+            // HR Candidate Data: Physical Attributes
+            setValue("height_cm", v.height_cm || undefined);
+            setValue("weight_kg", v.weight_kg || undefined);
+            setValue("religion", v.religion || "");
+
+            // JLPT Certificate Extension
+            setValue("jlpt_certificate_issue_year", v.jlpt_certificate_issue_year || undefined);
+
             // HR Candidate Data: Expectations & Availability
             setValue("expected_salary", v.expected_salary || 0);
             setValue("japan_return_date", v.japan_return_date ? v.japan_return_date.split('T')[0] : "");
@@ -324,6 +357,14 @@ export default function CandidateProfileSetting() {
                     main_job_fields: data.main_job_fields || [],
                     golden_skill: data.golden_skill || null,
                     japanese_speaking_level: data.japanese_speaking_level || null,
+
+                    // HR Candidate Data: Physical Attributes
+                    height_cm: data.height_cm ? Number(data.height_cm) : null,
+                    weight_kg: data.weight_kg ? Number(data.weight_kg) : null,
+                    religion: data.religion || null,
+
+                    // JLPT Certificate Extension
+                    jlpt_certificate_issue_year: data.jlpt_certificate_issue_year ? Number(data.jlpt_certificate_issue_year) : null,
 
                     // HR Candidate Data: Expectations & Availability
                     expected_salary: Number(data.expected_salary) || null,
@@ -502,6 +543,46 @@ export default function CandidateProfileSetting() {
                                             </div>
                                         </div>
 
+                                        {/* Physical Attributes */}
+                                        <h6 className="text-muted mb-3 mt-4">Detail Fisik</h6>
+                                        <div className="row">
+                                            <div className="col-md-4 mb-3">
+                                                <label className="form-label">Tinggi Badan <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    {...register("height_cm")}
+                                                    className={clsx("form-control", errors.height_cm && "is-invalid")}
+                                                    min={50}
+                                                    max={300}
+                                                    placeholder="e.g. 165"
+                                                />
+                                                {errors.height_cm && <div className="invalid-feedback">{errors.height_cm.message}</div>}
+                                            </div>
+                                            <div className="col-md-4 mb-3">
+                                                <label className="form-label">Berat Badan <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    {...register("weight_kg")}
+                                                    className={clsx("form-control", errors.weight_kg && "is-invalid")}
+                                                    min={10}
+                                                    max={500}
+                                                    step="0.1"
+                                                    placeholder="e.g. 60"
+                                                />
+                                                {errors.weight_kg && <div className="invalid-feedback">{errors.weight_kg.message}</div>}
+                                            </div>
+                                            <div className="col-md-4 mb-3">
+                                                <label className="form-label">Agama <span className="text-danger">*</span></label>
+                                                <select {...register("religion")} className={clsx("form-control", errors.religion && "is-invalid")}>
+                                                    <option value="">{t('settings.select')}</option>
+                                                    {RELIGION_OPTIONS.map(opt => (
+                                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    ))}
+                                                </select>
+                                                {errors.religion && <div className="invalid-feedback">{errors.religion.message}</div>}
+                                            </div>
+                                        </div>
+
                                         {/* Japan Experience & Language */}
                                         <h6 className="text-muted mb-3 mt-4">{t('settings.japanExperienceSection')}</h6>
                                         <div className="row">
@@ -533,6 +614,18 @@ export default function CandidateProfileSetting() {
                                                 <label className="form-label">{t('settings.jlptCertificate')} <span className="text-danger">*</span></label>
                                                 <input type="file" className="form-control" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, "japanese_certificate_url")} />
                                                 {watchedCert && <small className="text-success"><i className="mdi mdi-check-circle"></i> {t('common.uploaded')}</small>}
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label">Tahun Sertifikat JLPT <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    {...register("jlpt_certificate_issue_year")}
+                                                    className={clsx("form-control", errors.jlpt_certificate_issue_year && "is-invalid")}
+                                                    min={1984}
+                                                    max={new Date().getFullYear()}
+                                                    placeholder="e.g. 2023"
+                                                />
+                                                {errors.jlpt_certificate_issue_year && <div className="invalid-feedback">{errors.jlpt_certificate_issue_year.message}</div>}
                                             </div>
                                         </div>
 

@@ -297,6 +297,10 @@ export default function VerificationDetailPage({ id }: VerificationDetailPagePro
                                     <p className="mb-0">{verification.birth_date ? new Date(verification.birth_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not specified'}</p>
                                 </div>
                                 <div className="col-sm-6">
+                                    <h6 className="text-muted small mb-2">Gender</h6>
+                                    <p className="mb-0">{verification.gender === 'MALE' ? 'Male' : verification.gender === 'FEMALE' ? 'Female' : 'Not specified'}</p>
+                                </div>
+                                <div className="col-sm-6">
                                     <h6 className="text-muted small mb-2">Domicile City</h6>
                                     <p className="mb-0">{verification.domicile_city || 'Not specified'}</p>
                                 </div>
@@ -308,7 +312,43 @@ export default function VerificationDetailPage({ id }: VerificationDetailPagePro
                                     <h6 className="text-muted small mb-2">Number of Children</h6>
                                     <p className="mb-0">{verification.children_count !== undefined ? verification.children_count : 'Not specified'}</p>
                                 </div>
+                                <div className="col-sm-6">
+                                    <h6 className="text-muted small mb-2">Religion</h6>
+                                    <p className="mb-0">{verification.religion || 'Not specified'}</p>
+                                </div>
                             </div>
+
+                            {/* Physical Attributes */}
+                            <h6 className="text-muted mb-3 mt-4 border-top pt-3">
+                                <IconifyIcon icon="solar:body-bold" width={16} className="me-1" />
+                                Physical Attributes
+                            </h6>
+                            <div className="row g-3">
+                                <div className="col-sm-6">
+                                    <h6 className="text-muted small mb-2">Height</h6>
+                                    <p className="mb-0">{verification.height_cm ? `${verification.height_cm} cm` : 'Not specified'}</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <h6 className="text-muted small mb-2">Weight</h6>
+                                    <p className="mb-0">{verification.weight_kg ? `${verification.weight_kg} kg` : 'Not specified'}</p>
+                                </div>
+                            </div>
+
+                            {/* JLPT Certificate Year */}
+                            {verification.jlpt_certificate_issue_year && (
+                                <>
+                                    <h6 className="text-muted mb-3 mt-4 border-top pt-3">
+                                        <IconifyIcon icon="solar:diploma-bold" width={16} className="me-1" />
+                                        JLPT Certificate
+                                    </h6>
+                                    <div className="row g-3">
+                                        <div className="col-sm-6">
+                                            <h6 className="text-muted small mb-2">Issue Year</h6>
+                                            <p className="mb-0">{verification.jlpt_certificate_issue_year}</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -392,7 +432,7 @@ export default function VerificationDetailPage({ id }: VerificationDetailPagePro
                                                 <div className="d-flex flex-wrap gap-2">
                                                     {categorySkills.map(skill => (
                                                         <span key={skill.id} className={`badge px-3 py-2 ${category === 'COMPUTER' ? 'bg-primary' :
-                                                                category === 'LANGUAGE' ? 'bg-info' : 'bg-success'
+                                                            category === 'LANGUAGE' ? 'bg-info' : 'bg-success'
                                                             } text-white`}>
                                                             {skill.name}
                                                         </span>
@@ -634,7 +674,7 @@ export default function VerificationDetailPage({ id }: VerificationDetailPagePro
                                 <div className="progress flex-grow-1" style={{ height: 8 }}>
                                     <div
                                         className={`progress-bar ${completeness.percentage >= 80 ? 'bg-success' :
-                                                completeness.percentage >= 50 ? 'bg-warning' : 'bg-danger'
+                                            completeness.percentage >= 50 ? 'bg-warning' : 'bg-danger'
                                             }`}
                                         style={{ width: `${completeness.percentage}%` }}
                                     />
@@ -835,6 +875,26 @@ export default function VerificationDetailPage({ id }: VerificationDetailPagePro
                                                     </span>
                                                 ))}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* Interview Willingness */}
+                                    {onboardingData.willing_to_interview_onsite !== undefined && (
+                                        <div>
+                                            <small className="text-muted">Interview Preference</small>
+                                            <p className="mb-0">
+                                                {onboardingData.willing_to_interview_onsite ? (
+                                                    <span className="badge bg-success px-2 py-1">
+                                                        <IconifyIcon icon="solar:check-circle-bold" width={14} className="me-1" />
+                                                        Willing to interview onsite
+                                                    </span>
+                                                ) : (
+                                                    <span className="badge bg-secondary px-2 py-1">
+                                                        <IconifyIcon icon="solar:video-conference-bold" width={14} className="me-1" />
+                                                        Prefers online interview only
+                                                    </span>
+                                                )}
+                                            </p>
                                         </div>
                                     )}
 

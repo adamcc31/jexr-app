@@ -87,6 +87,13 @@ export interface OnboardingSubmitData {
     interests: InterestKey[];
     lpk_selection: LPKSelection;
     company_preferences: CompanyPreferenceKey[];
+    willing_to_interview_onsite?: boolean | null;
+    // Step 4: Personal Details
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    gender?: 'MALE' | 'FEMALE';
+    birth_date?: string;
 }
 
 // ============================================================================
@@ -94,7 +101,7 @@ export interface OnboardingSubmitData {
 // ============================================================================
 
 export interface OnboardingWizardState {
-    currentStep: 1 | 2 | 3;
+    currentStep: 1 | 2 | 3 | 4;
     // Step 1 data
     interests: InterestKey[];
     // Step 2 data
@@ -103,6 +110,13 @@ export interface OnboardingWizardState {
     lpkOtherName: string;
     // Step 3 data
     companyPreferences: CompanyPreferenceKey[];
+    // Step 4 data
+    willingToInterviewOnsite: boolean | null;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    gender: 'MALE' | 'FEMALE' | '';
+    birthDate: string;
     // UI state
     isSubmitting: boolean;
     error: string | null;
@@ -115,6 +129,12 @@ export const initialWizardState: OnboardingWizardState = {
     selectedLPK: null,
     lpkOtherName: '',
     companyPreferences: [],
+    willingToInterviewOnsite: null,
+    firstName: '',
+    lastName: '',
+    phone: '',
+    gender: '',
+    birthDate: '',
     isSubmitting: false,
     error: null,
 };

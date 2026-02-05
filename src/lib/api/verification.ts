@@ -39,14 +39,26 @@ export interface AccountVerificationDetail extends AccountVerification {
 
     // HR Candidate Data: Identity & Demographics
     birth_date?: string;
+    gender?: string; // MALE, FEMALE
     domicile_city?: string;
     marital_status?: string; // SINGLE, MARRIED, DIVORCED
     children_count?: number;
+
+    // HR Candidate Data: Physical Attributes (from migration 000022)
+    height_cm?: number;
+    weight_kg?: number;
+    religion?: string;
 
     // HR Candidate Data: Core Competencies
     main_job_fields?: string[];
     golden_skill?: string;
     japanese_speaking_level?: string; // NATIVE, FLUENT, BASIC, PASSIVE
+
+    // HR Candidate Data: JLPT Certificate (from migration 000022)
+    jlpt_certificate_issue_year?: number;
+
+    // Interview Willingness (from migration 000022)
+    willing_to_interview_onsite?: boolean;
 
     // HR Candidate Data: Expectations & Availability
     expected_salary?: number; // Netto/THP in raw number
@@ -144,6 +156,7 @@ export interface OnboardingData {
     lpk_selection?: LPKSelection;
     lpk_name?: string;
     company_preferences?: string[];
+    willing_to_interview_onsite?: boolean;
     completed_at?: string;
 }
 

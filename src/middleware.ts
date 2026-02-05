@@ -78,7 +78,13 @@ export async function middleware(request: NextRequest) {
         }
 
         // Add rate limit headers to successful responses for transparency
-        const response = NextResponse.next()
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('x-pathname', path)
+        const response = NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            }
+        })
         response.headers.set('X-RateLimit-Remaining', remaining.toString())
         response.headers.set('X-RateLimit-Reset', reset.toString())
         return response

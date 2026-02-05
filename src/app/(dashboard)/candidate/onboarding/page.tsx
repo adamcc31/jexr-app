@@ -12,11 +12,11 @@ import {
 } from '@/types/onboarding';
 import styles from './onboarding.module.css';
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+    const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
     // Form State
     const [interests, setInterests] = useState<InterestKey[]>([]);
@@ -24,6 +24,13 @@ export default function OnboardingPage() {
     const [selectedLPK, setSelectedLPK] = useState<LPK | null>(null);
     const [lpkOtherName, setLpkOtherName] = useState('');
     const [companyPreferences, setCompanyPreferences] = useState<CompanyPreferenceKey[]>([]);
+    const [willingToInterviewOnsite, setWillingToInterviewOnsite] = useState<boolean | null>(null);
+    // Step 4: Personal Details
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [gender, setGender] = useState<'MALE' | 'FEMALE' | ''>('');
+    const [birthDate, setBirthDate] = useState('');
 
     // UI State
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,21 +47,31 @@ export default function OnboardingPage() {
                 return false;
             case 3:
                 return companyPreferences.length > 0;
+            case 4:
+                // Validate personal details and interview preference
+                return (
+                    willingToInterviewOnsite !== null &&
+                    firstName.trim().length > 0 &&
+                    lastName.trim().length > 0 &&
+                    phone.trim().length > 0 &&
+                    gender !== '' &&
+                    birthDate !== ''
+                );
             default:
                 return false;
         }
-    }, [currentStep, interests, lpkSelectionType, selectedLPK, lpkOtherName, companyPreferences]);
+    }, [currentStep, interests, lpkSelectionType, selectedLPK, lpkOtherName, companyPreferences, willingToInterviewOnsite, firstName, lastName, phone, gender, birthDate]);
 
     const handleBack = () => {
         if (currentStep > 1) {
-            setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3);
+            setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
             setError(null);
         }
     };
 
     const handleNext = () => {
         if (currentStep < TOTAL_STEPS && canProceed()) {
-            setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3);
+            setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3 | 4);
             setError(null);
         }
     };
@@ -73,6 +90,13 @@ export default function OnboardingPage() {
                     none: lpkSelectionType === 'none',
                 },
                 company_preferences: companyPreferences,
+                willing_to_interview_onsite: willingToInterviewOnsite,
+                // Step 4: Personal Details
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                phone: phone.trim(),
+                gender: gender as 'MALE' | 'FEMALE',
+                birth_date: birthDate,
             };
 
             await submitOnboarding(data);
@@ -122,6 +146,11 @@ export default function OnboardingPage() {
             title: 'Company Type Preferences',
             subtitle: 'Help us understand your ideal workplace. Select the types of companies you would prefer to work for.',
             question: 'What type of company ownership do you prefer?',
+        },
+        4: {
+            title: 'Personal Details & Interview',
+            subtitle: 'Complete your profile with basic personal information and let us know your interview availability.',
+            question: 'Please fill in your personal details',
         },
     };
 
@@ -271,6 +300,89 @@ export default function OnboardingPage() {
                                     onChange={() => handlePreferenceToggle('local')}
                                     label="100% Indonesian-owned company (Local)"
                                     sublabel="Companies fully owned by Indonesian investors"
+                                />
+                            </div>
+                        )}
+
+                        {/* Step 4 */}
+                        {currentStep === 4 && (
+                            <div className={styles.optionsList}>
+                                {/* Personal Details Form */}
+                                <div className={styles.formSection}>
+                                    <div className={styles.formRow}>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Nama Depan <span className={styles.required}>*</span></label>
+                                            <input
+                                                type="text"
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                placeholder="Contoh: Budi"
+                                                className={styles.textInput}
+                                            />
+                                        </div>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Nama Belakang <span className={styles.required}>*</span></label>
+                                            <input
+                                                type="text"
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                placeholder="Contoh: Santoso"
+                                                className={styles.textInput}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.formLabel}>Nomor Telepon (WhatsApp) <span className={styles.required}>*</span></label>
+                                        <input
+                                            type="tel"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            placeholder="Contoh: 081234567890"
+                                            className={styles.textInput}
+                                        />
+                                        <span className={styles.formHint}>Pastikan nomor ini bisa dihubungi melalui WhatsApp</span>
+                                    </div>
+                                    <div className={styles.formRow}>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Jenis Kelamin <span className={styles.required}>*</span></label>
+                                            <select
+                                                value={gender}
+                                                onChange={(e) => setGender(e.target.value as 'MALE' | 'FEMALE' | '')}
+                                                className={styles.selectInput}
+                                            >
+                                                <option value="">Pilih...</option>
+                                                <option value="MALE">Laki-laki</option>
+                                                <option value="FEMALE">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Tanggal Lahir <span className={styles.required}>*</span></label>
+                                            <input
+                                                type="date"
+                                                value={birthDate}
+                                                onChange={(e) => setBirthDate(e.target.value)}
+                                                className={styles.textInput}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Interview Preference */}
+                                <div className={styles.divider}>
+                                    <div className={styles.dividerLine} />
+                                    <span className={styles.dividerText}>Preferensi Interview</span>
+                                    <div className={styles.dividerLine} />
+                                </div>
+
+                                <RadioOption
+                                    checked={willingToInterviewOnsite === true}
+                                    onChange={() => setWillingToInterviewOnsite(true)}
+                                    label="Ya, saya bersedia hadir interview secara langsung di Indonesia"
+                                />
+                                <RadioOption
+                                    checked={willingToInterviewOnsite === false}
+                                    onChange={() => setWillingToInterviewOnsite(false)}
+                                    label="Tidak, saya hanya bisa interview online/remote"
                                 />
                             </div>
                         )}
