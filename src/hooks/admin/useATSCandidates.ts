@@ -97,13 +97,21 @@ function buildFilterParams(filter: ATSFilter): URLSearchParams {
         params.append('sort_order', filter.sort_order);
     }
 
+    // Verification
+    if (filter.verified_at_start) {
+        params.append('verified_at_start', filter.verified_at_start);
+    }
+    if (filter.verified_at_end) {
+        params.append('verified_at_end', filter.verified_at_end);
+    }
+
     return params;
 }
 
 /**
  * Fetch ATS candidates with filters
  */
-async function fetchATSCandidates(filter: ATSFilter): Promise<ATSCandidateResponse> {
+export async function fetchATSCandidates(filter: ATSFilter): Promise<ATSCandidateResponse> {
     const params = buildFilterParams(filter);
     const response = await adminApiClient.get<ATSCandidateResponse>(
         `/admin/ats/candidates?${params.toString()}`

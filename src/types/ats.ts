@@ -45,6 +45,10 @@ export interface ATSFilter {
     page_size?: number;
     sort_by?: 'verified_at' | 'japanese_level' | 'age' | 'expected_salary';
     sort_order?: 'asc' | 'desc';
+
+    // Verification
+    verified_at_start?: string;
+    verified_at_end?: string;
 }
 
 // ============================================================================
@@ -165,10 +169,19 @@ export const EXPORT_COLUMNS: ExportColumn[] = [
     // Work
     { key: 'highest_education', label: 'Education', defaultChecked: false, group: 'work' },
     { key: 'major_field', label: 'Major Field', defaultChecked: false, group: 'work' },
-    { key: 'total_experience_months', label: 'Total Experience (Months)', defaultChecked: true, group: 'work' },
+    { key: 'total_experience_months', label: 'Total Indonesia Work Experience (Months)', defaultChecked: true, group: 'work' },
     { key: 'last_position', label: 'Last Position', defaultChecked: true, group: 'work' },
     { key: 'expected_salary', label: 'Expected Salary (IDR)', defaultChecked: true, group: 'work' },
     { key: 'available_start_date', label: 'Available Start Date', defaultChecked: false, group: 'work' },
+    { key: 'preferred_industries', label: 'Preferred Industries', defaultChecked: true, group: 'work' },
+
+    // Competencies
+    { key: 'main_job_fields', label: 'Main Job Fields', defaultChecked: true, group: 'qualifications' },
+    { key: 'golden_skill', label: 'Golden Skill', defaultChecked: true, group: 'qualifications' },
+
+    // Onboarding
+    { key: 'special_interest', label: 'Special Interest', defaultChecked: true, group: 'optional' },
+    { key: 'company_preference', label: 'Company Type Preference', defaultChecked: true, group: 'optional' },
 
     // Optional
     { key: 'skills', label: 'Skills', defaultChecked: false, group: 'optional' },

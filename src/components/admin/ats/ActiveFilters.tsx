@@ -153,6 +153,17 @@ export default function ActiveFilters({ filter, options, onRemove }: ActiveFilte
         });
     }
 
+    // Verification Status
+    if (filter.verified_at_start || filter.verified_at_end) {
+        const start = filter.verified_at_start || '...';
+        const end = filter.verified_at_end || '...';
+        chips.push({
+            key: 'verified_at_start', // Using start key to represent the group
+            label: `Verified: ${start} – ${end}`,
+            value: 'range' // arbitrary value to distinguish if needed
+        });
+    }
+
     if (chips.length === 0) {
         return null;
     }

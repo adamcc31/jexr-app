@@ -427,6 +427,39 @@ export default function FilterPanel({
                             </Form.Group>
                         </Accordion.Body>
                     </Accordion.Item>
+
+                    {/* Group 5: Verification Status */}
+                    <Accordion.Item eventKey="4">
+                        <Accordion.Header>Verification Status</Accordion.Header>
+                        <Accordion.Body>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="small text-muted">Verified Date Range</Form.Label>
+                                <Row>
+                                    <Col>
+                                        <Form.Control
+                                            type="date"
+                                            size="sm"
+                                            value={filter.verified_at_start || ''}
+                                            onChange={(e) => updateFilter('verified_at_start', e.target.value || undefined)}
+                                            placeholder="From"
+                                            title="Verified From"
+                                        />
+                                    </Col>
+                                    <Col xs="auto" className="px-1 d-flex align-items-center">–</Col>
+                                    <Col>
+                                        <Form.Control
+                                            type="date"
+                                            size="sm"
+                                            value={filter.verified_at_end || ''}
+                                            onChange={(e) => updateFilter('verified_at_end', e.target.value || undefined)}
+                                            placeholder="To"
+                                            title="Verified To"
+                                        />
+                                    </Col>
+                                </Row>
+                            </Form.Group>
+                        </Accordion.Body>
+                    </Accordion.Item>
                 </Accordion>
 
                 <div className="mt-3">
@@ -434,7 +467,7 @@ export default function FilterPanel({
                         Apply Filters
                     </Button>
                 </div>
-            </Card.Body>
-        </Card>
+            </Card.Body >
+        </Card >
     );
 }

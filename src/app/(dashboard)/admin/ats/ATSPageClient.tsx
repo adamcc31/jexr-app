@@ -7,7 +7,7 @@
  * - Smart Filters (collapsible panel)
  * - Active Filter Chips
  * - Candidate Table with sorting and pagination
- * - Export Modal
+ * - Export Modal (Local Enhanced Version)
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -17,14 +17,15 @@ import IconifyIcon from '@/components/dashboard-view/wrappers/IconifyIcon';
 import {
     FilterPanel,
     CandidateTable,
-    ExportModal,
     ActiveFilters,
 } from '@/components/admin/ats';
+import ExportModalLocal from './components/ExportModalLocal';
 import {
     useATSCandidates,
     useATSFilterOptions,
-    useATSExport,
+    fetchATSCandidates,
 } from '@/hooks/admin/useATSCandidates';
+import { verificationService } from '@/lib/api/verification';
 import type { ATSFilter, ATSCandidate } from '@/types/ats';
 
 // Default filter state
@@ -33,6 +34,31 @@ const DEFAULT_FILTER: ATSFilter = {
     page_size: 20,
     sort_by: 'verified_at',
     sort_order: 'desc',
+};
+
+// Helper to generate unique code
+const generateUniqueCode = (name: string, id: number) => {
+    const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    const initials = cleanName.length >= 3 ? cleanName.substring(0, 3) : cleanName.padEnd(3, 'X');
+    return `${initials}${id.toString()}`;
+};
+
+// Helper for CSV escaping
+const escapeCSV = (value: string | number | undefined | null) => {
+    if (value === undefined || value === null) return '';
+    const stringValue = String(value);
+    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
+};
+
+// Helper to clean skill name (remove garbage/mojibake in parentheses)
+const cleanSkillName = (name: string) => {
+    // Removes " (xxxxx)" where xxxxx contains non-ASCII or even just content in parens if that's the pattern
+    // The user examples: "Welding (æº¶æŽ¥)", "Japanese (æ—¥æœ¬èªž)"
+    // We will aggressively remove anything in parentheses affecting the end of the string.
+    return name.replace(/\s*\(.*\).*$/, '').trim();
 };
 
 export default function ATSPageClient() {
@@ -46,12 +72,12 @@ export default function ATSPageClient() {
 
     // Export modal state
     const [showExportModal, setShowExportModal] = useState(false);
+    const [isExportingDirect, setIsExportingDirect] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
 
     // Fetch data
     const { data: candidates, isLoading: candidatesLoading } = useATSCandidates(appliedFilter);
     const { data: filterOptions, isLoading: optionsLoading } = useATSFilterOptions();
-    const { mutate: exportData, isPending: isExporting } = useATSExport();
 
     // Apply filters (from filter panel)
     const handleApplyFilters = useCallback(() => {
@@ -95,6 +121,8 @@ export default function ATSPageClient() {
                 if (key === 'expected_salary_max') newFilter.expected_salary_min = undefined;
                 if (key === 'total_experience_min') newFilter.total_experience_max = undefined;
                 if (key === 'total_experience_max') newFilter.total_experience_min = undefined;
+                if (key === 'verified_at_start') newFilter.verified_at_end = undefined;
+                if (key === 'verified_at_end') newFilter.verified_at_start = undefined;
             }
 
             setAppliedFilter(newFilter);
@@ -109,32 +137,174 @@ export default function ATSPageClient() {
         router.push(`/admin/account-verification/${candidate.verification_id}`);
     }, [router]);
 
-    // Handle export
-    const handleExport = useCallback(
-        (columns: string[], format: 'xlsx' | 'csv') => {
+    // Handle enhanced export
+    // Fetches all candidates matching filter, then details for each, then generates CSV
+    const handleExportEnhanced = useCallback(
+        async (columns: string[], format: 'xlsx' | 'csv') => {
+            setIsExportingDirect(true);
             setExportError(null);
-            exportData(
-                { filter: appliedFilter, columns, format },
-                {
-                    onSuccess: (blob) => {
-                        // Create download link
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `ats_candidates.${format}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        setShowExportModal(false);
-                    },
-                    onError: (error) => {
-                        setExportError(error.message || 'Export failed. Please try again.');
-                    },
+
+            try {
+                // 1. Fetch all candidates (pagination loop)
+                let allCandidates: ATSCandidate[] = [];
+                let page = 1;
+                let totalPages = 1;
+                const BATCH_SIZE = 100; // conservative batch size
+
+                // Fetch first page to get total pages
+                // Use a loop to get all pages
+                // Safety limit: 10000 candidates (100 pages)
+                const MAX_PAGES = 100;
+
+                do {
+                    const response = await fetchATSCandidates({
+                        ...appliedFilter,
+                        page,
+                        page_size: BATCH_SIZE
+                    });
+
+                    if (response.data && response.data.length > 0) {
+                        allCandidates = [...allCandidates, ...response.data];
+                    }
+
+                    totalPages = response.totalPages;
+                    page++;
+
+                } while (page <= totalPages && page <= MAX_PAGES);
+
+                if (allCandidates.length === 0) {
+                    throw new Error('No candidates found to export.');
                 }
-            );
+
+                // 2. Fetch details and enrich data
+                const enrichedRows = [];
+
+                // Fetch details in parallel chunks to speed up
+                const CHUNK_SIZE = 5;
+                for (let i = 0; i < allCandidates.length; i += CHUNK_SIZE) {
+                    const chunk = allCandidates.slice(i, i + CHUNK_SIZE);
+                    const chunkPromises = chunk.map(async (candidate) => {
+                        let detail = null;
+                        let onboarding_data = undefined;
+                        let skills = undefined;
+
+                        try {
+                            // Fetch verification detail for critical fields
+                            const detailResponse = await verificationService.getDetail(candidate.verification_id);
+                            detail = detailResponse.verification;
+                            // Assign to outer variables
+                            onboarding_data = detailResponse.onboarding_data;
+                            skills = detailResponse.skills;
+                        } catch (err) {
+                            console.error(`Failed to fetch details for candidate ${candidate.verification_id}`, err);
+                        }
+
+                        // Enrich data
+                        const row: Record<string, string | number | null | undefined> = {};
+
+                        // Default candidate fields
+                        row.full_name = candidate.full_name;
+                        row.age = candidate.age;
+                        row.gender = candidate.gender;
+                        row.domicile_city = candidate.domicile_city;
+                        row.marital_status = candidate.marital_status;
+                        row.japanese_level = candidate.japanese_level;
+                        row.lpk_training_name = candidate.lpk_training_name;
+                        row.english_cert_type = candidate.english_cert_type;
+                        row.english_score = candidate.english_score;
+                        row.highest_education = candidate.highest_education;
+                        row.major_field = candidate.major_field;
+                        row.last_position = candidate.last_position;
+                        row.expected_salary = candidate.expected_salary;
+                        row.available_start_date = candidate.available_start_date;
+                        row.verification_status = candidate.verification_status;
+                        row.verified_at = candidate.verified_at;
+                        row.total_experience_months = candidate.total_experience_months;
+
+                        // Enhanced fields from Detail
+                        if (detail) {
+                            row.email = detail.user_email;
+                            row.phone = detail.phone;
+                            row.japan_experience_months = detail.japan_experience_duration; // Fix bug: use detail duration
+                            row.unique_code = generateUniqueCode(candidate.full_name, candidate.verification_id);
+
+                            // Competencies
+                            row.main_job_fields = detail.main_job_fields?.join(', ');
+                            row.golden_skill = detail.golden_skill;
+
+                            // Work
+                            row.preferred_industries = detail.preferred_industries?.join(', ');
+                        } else {
+                            // Fallback if detail fetch fails
+                            row.japan_experience_months = candidate.japan_experience_months;
+                            row.unique_code = generateUniqueCode(candidate.full_name, candidate.verification_id);
+                        }
+
+                        // Onboarding Data
+                        if (onboarding_data) {
+                            row.special_interest = onboarding_data.interests?.join(', ');
+                            row.company_preference = onboarding_data.company_preferences?.join(', ');
+                        }
+
+                        // Skills (Fix: Use names instead of IDs, and clean garbage data)
+                        if (skills && skills.length > 0) {
+                            row.skills = skills.map((s: any) => cleanSkillName(s.name)).join(', ');
+                        } else if (candidate.skills) {
+                            // Fallback to candidate list skills if detail/skills missing
+                            row.skills = candidate.skills.map(s => cleanSkillName(s)).join(', ');
+                        }
+
+                        return row;
+                    });
+
+                    const chunkResults = await Promise.all(chunkPromises);
+                    enrichedRows.push(...chunkResults);
+                }
+
+                // 3. Generate CSV
+                // Map columns to data keys
+                // Note: 'unique_code', 'email', 'phone' are handled.
+                // Others map directly to keys used above.
+
+                // Header row
+                const headerRow = columns.map(colKey => {
+                    if (colKey === 'unique_code') return 'Unique Code';
+                    if (colKey === 'email') return 'Email';
+                    if (colKey === 'phone') return 'Phone';
+                    // Find label in filter options or use key
+                    return colKey.replace(/_/g, ' ').toUpperCase();
+                }).join(',');
+
+                // Data rows
+                const dataRows = enrichedRows.map(row => {
+                    return columns.map(colKey => {
+                        return escapeCSV(row[colKey]);
+                    }).join(',');
+                });
+
+                const csvContent = [headerRow, ...dataRows].join('\n');
+
+                // 4. Download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `ats_export_enhanced_${new Date().toISOString().slice(0, 10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                setShowExportModal(false);
+
+            } catch (err: any) {
+                console.error('Export failed:', err);
+                setExportError(err.message || 'Export failed. Please try again.');
+            } finally {
+                setIsExportingDirect(false);
+            }
         },
-        [appliedFilter, exportData]
+        [appliedFilter]
     );
 
     // Count active filters
@@ -174,7 +344,7 @@ export default function ATSPageClient() {
                 <Button
                     variant="primary"
                     onClick={() => setShowExportModal(true)}
-                    disabled={!candidates?.total}
+                    disabled={!candidates?.total || isExportingDirect}
                 >
                     <IconifyIcon icon="solar:download-linear" className="me-2" />
                     Export
@@ -235,16 +405,16 @@ export default function ATSPageClient() {
                 </Col>
             </Row>
 
-            {/* Export Modal */}
-            <ExportModal
+            {/* Export Modal - Local Enhanced Version */}
+            <ExportModalLocal
                 show={showExportModal}
                 onHide={() => {
                     setShowExportModal(false);
                     setExportError(null);
                 }}
                 totalCandidates={candidates?.total || 0}
-                onExport={handleExport}
-                isExporting={isExporting}
+                onExport={handleExportEnhanced}
+                isExporting={isExportingDirect}
                 error={exportError}
             />
         </Container>
